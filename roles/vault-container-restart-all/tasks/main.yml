@@ -1,0 +1,18 @@
+---
+#consul_dir is localhost dir containing the consul.hcl file e.g. ~/consul (no trailing /)
+#consul_storage_dir is localhost dir that will be used for storing consul data persistently e.g. ~/consul-storage (no trailing /)
+
+- name: (Re)start all vault docker containers
+  include_role:
+    name: vault-container-restart
+  vars:
+    container_name: "{{ item.key }}"
+    vault_image_version: "v1"
+    host_port: "{{ item.value }}"
+    container_port: "{{ item.value }}"
+    vault_config_consul_dir: "{{ base_vault_dir }}/{{ item.key }}/consul/config"
+    vault_config_dir: "{{ base_vault_dir }}/{{ item.key }}/vault/config"
+    consul_storage_dir: "{{ base_vault_dir }}/{{ item.key }}/consul-storage"
+    vault_host_audit_dir: "{{ base_vault_dir }}/{{ item.key }}/audit-logs"
+    container_restart: "{{ vault_container_restart_all }}"
+  with_dict: "{{ vault_containers }}"

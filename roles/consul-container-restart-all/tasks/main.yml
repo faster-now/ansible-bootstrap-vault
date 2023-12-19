@@ -1,0 +1,15 @@
+---
+#consul_dir is localhost dir containing the consul.hcl file e.g. ~/consul (no trailing /)
+#consul_storage_dir is localhost dir that will be used for storing consul data persistently e.g. ~/consul-storage (no trailing /)
+- name: (Re)start consul docker containers
+  include_role:
+    name: consul-container-restart
+  vars:
+    container_name: "{{ consul_server }}"
+    consul_image_version: "v1"
+    consul_config_dir: "{{ base_consul_dir }}/{{ consul_server }}/config"
+    consul_storage_dir: "{{ base_consul_dir }}/{{ consul_server }}/consul-storage"
+    container_restart: "{{ consul_container_restart_all }}"
+  loop: "{{ consul_servers }}"
+  loop_control:
+    loop_var: consul_server

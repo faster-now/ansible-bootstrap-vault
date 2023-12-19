@@ -1,0 +1,31 @@
+---
+- name: Check if vault is using TLS
+  uri:
+    url: "http://{{ inventory_hostname }}:{{ vault_port }}/v1/sys/health"
+    status_code: 200,400,429,472,501,503,-1
+  register: vault_health_response
+  retries: 7
+  delay: 2
+  until: ('status' in vault_health_response) and (vault_health_response.status != -1)
+
+- name: Is using HTTPS
+  set_fact:
+    is_https: "{{ vault_health_response.status == 400 }}"
+
+# #Downside of this is only checking and individual Vault host
+# - name: Check if using HTTPS
+#   lineinfile:
+#     path: "{{ base_vault_dir }}/{{ vault_containers[0].key }}/vault/config/vault.hcl"
+#     regexp: '^(\s*)tls_cert_file\s(.*?)$'
+#     state: absent
+#   check_mode: yes
+#   changed_when: false
+#   register: is_https
+
+# - name: Wait for service to be ready
+#   wait_for:
+#     port: 8200
+#     host: 127.0.0.1
+#     connect_timeout: 3
+#     delay: 3
+#     timeout: 30

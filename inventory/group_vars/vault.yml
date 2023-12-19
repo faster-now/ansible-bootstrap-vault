@@ -1,0 +1,13 @@
+---
+vault_servers: #use dict so a port number can be specified for each vault server to facilitate running multiple containers on a single host
+  vault-a: 8200
+  vault-b: 8800
+vault_containers: #use to create and start containers on limited resource host (free tier on cloud providers cant cope with 5 containers)
+  vault-a: 8200
+  #vault-b: 8800 #remove this if the host cant cope with all 5 containers
+vault_build_files_dir: vault-files
+base_vault_dir: ~/vault
+vault_config_dir: ~/vault/config
+vault_image_name: my-vault
+vault_container_audit_dir: /opt/vault
+vault_port: 8200 #the main Vault port to try to connect to when running HTTP(S) operations against Vault

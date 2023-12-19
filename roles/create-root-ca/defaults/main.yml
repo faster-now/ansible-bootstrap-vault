@@ -1,0 +1,9 @@
+---
+vault_url: http://127.0.0.1:8200
+vault_root_token_file: ~/vault/root-token.txt
+vault_token: "{{ lookup('file', '~/vault/root-token.txt', errors='ignore') }}" #if already initialised root token may exist in file so read it in so that audit check can be done
+
+root_ca_name: vaultca-root
+root_ca_file: ~/vault/certs/root_ca.cer
+ca_lifetime: 315360000 #10 years (in seconds)
+root_ca_role: sub_creation

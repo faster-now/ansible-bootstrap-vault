@@ -1,0 +1,68 @@
+---
+
+#is_https and vault_port come from dependent role
+- name: Setting the Vault URL
+  set_fact:
+    vault_url: "{{ is_https | ternary('https', 'http') }}://{{ inventory_hostname }}:{{ vault_port }}"
+
+- name: Check if AppRole needs created
+  community.hashi_vault.vault_read:
+    url: "{{ vault_url }}"
+    path: sys/auth
+    token: "{{ vault_token }}"
+    token_validate: false
+    validate_certs: false
+  register: auth_list_result
+
+- block:
+  - name: Create AppRole that will be used by TF
+    community.hashi_vault.vault_write:
+      url: "{{ vault_url }}"
+      path: sys/auth/approle-tf
+      data:
+        type: approle
+      token: "{{ vault_token }}"
+      validate_certs: false
+      token_validate: false
+
+  - name: Create the Vault policy for TF
+    community.hashi_vault.vault_write:
+      url: "{{ vault_url }}"
+      path: sys/policy/tf-policy
+      data:
+        policy: "path \"*\" {capabilities = [\"create\", \"read\", \"update\", \"delete\", \"list\", \"sudo\"]}"
+      token: "{{ vault_token }}"
+      validate_certs: false
+      token_validate: false
+
+  - name: Create the AppRole role with the required policies for TF
+    community.hashi_vault.vault_write:
+      url: "{{ vault_url }}"
+      path: auth/approle-tf/role/terraform
+      data:
+        policies: "tf-policy"
+      token: "{{ vault_token }}"
+      validate_certs: false
+      token_validate: false
+
+  - name: Update the AppRole role role-id
+    community.hashi_vault.vault_write:
+      url: "{{ vault_url }}"
+      path: auth/approle-tf/role/terraform/role-id
+      data:
+        role_id: "{{ role_id }}"
+      token: "{{ vault_token }}"
+      validate_certs: false
+      token_validate: false
+
+  - name: Update the AppRole role secret-id
+    community.hashi_vault.vault_write:
+      url: "{{ vault_url }}"
+      path: auth/approle-tf/role/terraform/custom-secret-id
+      data:
+        secret_id: "{{ secret_id }}"
+      token: "{{ vault_token }}"
+      validate_certs: false
+      token_validate: false
+  when:
+    - "not 'approle-tf/' in (auth_list_result | string)"

@@ -1,0 +1,22 @@
+---
+- hosts: ansible
+  gather_facts: no
+  remote_user: "{{ user }}"
+  become: no
+
+  tasks:
+    - name: Download the Hashicorp Vault and Consul binaries to use for the install
+      include_role:
+        name: download-binaries
+     
+- hosts: consul:vault
+  tasks:
+    - ansible.builtin.copy:
+        src: "{{ build_dir }}/{{ consul_binary }}"
+        dest: "{{ build_dir }}/{{ consul_binary }}"
+
+- hosts: vault
+  tasks:
+    - ansible.builtin.copy:
+        src: "{{ build_dir }}/{{ vault_binary }}" #local location of binary
+        dest: "{{ build_dir }}/{{ vault_binary }}" #store in same location with same name on the remote

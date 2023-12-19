@@ -1,0 +1,6 @@
+---
+vault_root_token_file: ~/vault/root-token.txt
+vault_token: "{{ lookup('file', '~/vault/root-token.txt', errors='ignore') }}" #if already initialised root token may exist in file so read it in so that audit check can be done
+
+role_id: "{{ lookup('file', '~/role-id.txt', errors='ignore') }}"
+secret_id: "{{ lookup('file', '~/secret-id.txt', errors='ignore') }}"

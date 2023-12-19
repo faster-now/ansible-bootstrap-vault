@@ -1,0 +1,48 @@
+---
+## ansible-playbook -e "@vault/passwd.yml" init-unseal-vault.yml --check
+
+# The default status codes are:
+#   200 if initialized, unsealed, and active
+#   429 if unsealed and standby
+#   472 if data recovery mode replication secondary and active
+#   501 if not initialized
+#   503 if sealed
+
+#is_https and vault_port come from dependent role
+
+- name: Get Vault protocol
+  include_role:
+    name: fetch-vault-protocol
+  vars:
+    port: "{{ vault_port }}"
+
+- name: Setting the Vault URL
+  set_fact:
+    vault_addr: "{{ is_https | ternary('https', 'http') }}://{{ inventory_hostname }}:{{ vault_port }}"
+
+- name: Check if vault is sealed
+  uri:
+    url: "{{ vault_addr }}/v1/sys/health"
+    validate_certs: "{{ tls_skip_verify | ternary('false', 'true') }}"
+    status_code: 200,429,472,501,503
+  retries: 3
+  delay: 2
+  register: vault_health_response
+  run_once: true
+
+- name: Unseal vault
+  uri:
+    url: "{{ vault_addr }}/v1/sys/unseal"
+    body:
+      key: "{{ item }}"
+    body_format: json
+    method: PUT
+    validate_certs: "{{ tls_skip_verify | ternary('false', 'true') }}"
+  register: unseal_vault_response
+  run_once: true
+  with_items:
+    - "{{ vault_keys }}"
+  when:
+    - vault_health_response.status == 503
+    - vault_health_response.status != 501
+    - vault_keys is defined

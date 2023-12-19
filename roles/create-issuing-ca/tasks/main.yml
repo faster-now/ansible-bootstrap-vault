@@ -1,0 +1,115 @@
+---
+
+- name: Create parent folder to store the certs
+  file:
+    path: "{{ issuing_ca_file | dirname }}"
+    state: directory
+    owner: "{{user}}"
+    group: "{{user}}"
+    mode: 0775
+
+- name: Check if Issuing CA needs created
+  community.hashi_vault.vault_read:
+    url: "{{ vault_url }}"
+    path: sys/mounts
+    token: "{{ vault_token }}"
+    token_validate: false
+  register: mount_list_result
+
+- name: Create Issuing CA for issuing consul and vault TLS certs
+  community.hashi_vault.vault_write:
+    url: "{{ vault_url }}"
+    path: sys/mounts/pki_int
+    data:
+      type: pki
+    token: "{{ vault_token }}"
+    token_validate: false
+  when:
+    - "not 'pki_int/' in (mount_list_result | string)"
+
+- name: Check if Issuing CA needs tuned
+  community.hashi_vault.vault_read:
+    url: "{{ vault_url }}"
+    path: sys/mounts/pki_int/tune
+    token: "{{ vault_token }}"
+    token_validate: false
+  register: needs_tuned_result
+
+- name: Configure the Issuing CA
+  community.hashi_vault.vault_write:
+    url: "{{ vault_url }}"
+    path: sys/mounts/pki/tune
+    data:
+      max_lease_ttl: "{{ ca_lifetime }}"
+    token: "{{ vault_token }}"
+    token_validate: false
+  when:
+    - needs_tuned_result.data.data.max_lease_ttl != ca_lifetime
+
+- name: Check if Issuing CA certificate already exists
+  community.hashi_vault.vault_read:
+    url: "{{ vault_url }}"
+    path: pki_int/cert/ca
+    token: "{{ vault_token }}"
+    token_validate: false
+  ignore_errors: true
+  register: ca_cert_exists_result
+
+- name: Generate the Issuing CA CSR
+  community.hashi_vault.vault_write:
+    url: "{{ vault_url }}"
+    path: pki_int/intermediate/generate/internal
+    data:
+      common_name: "{{ issuing_ca_name }}"
+      issuer_name: "{{ issuing_ca_name }}"
+      ttl: "{{ ca_lifetime }}"
+    token: "{{ vault_token }}"
+    token_validate: false
+  register: ca_csr_result
+  changed_when: "'-----BEGIN' in (ca_csr_result | string)"
+  when:
+    - ca_cert_exists_result is not defined or ca_cert_exists_result.failed
+
+- name: Sign the CSR to create the Intermediate CA
+  community.hashi_vault.vault_write:
+    url: "{{ vault_url }}"
+    path: pki/root/sign-intermediate
+    data:
+      csr: "{{ ca_csr_result.data.data.csr }}"
+      format: pem_bundle
+      ttl: "{{ ca_lifetime }}"
+    token: "{{ vault_token }}"
+    token_validate: false
+  register: ca_cert_result
+  changed_when: "'-----BEGIN' in (ca_cert_result | string)"
+  when:
+    - ca_csr_result is defined
+    - ca_csr_result.changed
+
+- block:
+  - name: Import the signed Intermediate CA certificate
+    community.hashi_vault.vault_write:
+      url: "{{ vault_url }}"
+      path: pki_int/intermediate/set-signed
+      data:
+        certificate: "{{ ca_cert_result.data.data.certificate }}"
+      token: "{{ vault_token }}"
+      token_validate: false
+
+  - name: Write Intermediate certificate to file
+    copy:
+      content: "{{ ca_cert_result.data.data.certificate }}"
+      dest: "{{ issuing_ca_file }}"
+  when:
+    - ca_cert_result is defined
+    - ca_cert_result.changed
+
+- name: Create Issuing CA role for leaf certificates
+  community.hashi_vault.vault_write:
+    url: "{{ vault_url }}"
+    path: pki_int/roles/leaf_certs
+    data:
+      allow_any_name: true
+      ttl: "{{ leaf_cert_lifetime }}"
+    token: "{{ vault_token }}"
+    token_validate: false

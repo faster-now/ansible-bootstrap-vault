@@ -1,0 +1,21 @@
+---
+#consul_dir is localhost dir containing the consul.hcl file e.g. ~/consul (no trailing /)
+#consul_storage_dir is localhost dir that will be used for storing consul data persistently e.g. ~/consul-storage (no trailing /)
+- name: Now create a Consul Docker Container from the image
+  docker_container:
+    name: "{{ container_name }}"
+    image: "{{ consul_image_name }}:{{ consul_image_version }}"
+    state: started
+    restart_policy: unless-stopped
+    restart: "{{ consul_container_restart }}"
+    networks:
+      - name: "{{ docker_network }}"
+#    ports:
+#      - "7500:7500"
+#      - "7300:7300"
+#      - "7301:7301"
+    volumes:
+      - "{{ consul_config_dir }}/:{{ consul_container_config_dir }}"
+      - "{{ consul_storage_dir }}/:/opt/consul-storage"
+      # - /opt/test-static/nginx/ssl/:/etc/nginx/ssl
+      # - /opt/test-static/public/:/opt/test-static/public

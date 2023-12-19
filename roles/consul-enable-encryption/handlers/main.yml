@@ -1,0 +1,28 @@
+---
+# - name: Restart consul
+#   include_role:
+#     name: consul-container-restart
+#   vars:
+#     container_name: "{{ consul_server }}"
+#     consul_image_version: "v1"
+#     consul_config_dir: "{{ base_consul_dir }}/{{ consul_server }}/config"
+#     consul_storage_dir: "{{ base_consul_dir }}/{{ consul_server }}/consul-storage"
+#     container_restart: yes
+#   loop: "{{ consul_servers }}"
+#   loop_control:
+#     loop_var: consul_server
+
+
+  # - name: Restart Consul
+  #     docker_container:
+  #       name: "{{ item }}"
+  #       image: "{{consul_image_name}}:v1"
+  #       state: started
+  #       restart_policy: unless-stopped
+  #       restart: yes
+  #       networks:
+  #         - name: "{{ docker_network }}"
+  #       volumes:
+  #         - "~/consul/{{item}}.hcl:/etc/consul/consul.hcl"
+  #         - "~/consul-storage/{{item}}/:/opt/consul-storage"
+  #     loop: "{{consul_servers}}"

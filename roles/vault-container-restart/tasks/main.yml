@@ -1,0 +1,30 @@
+---
+#consul_dir is localhost dir containing the consul.hcl file e.g. ~/consul (no trailing /)
+#consul_storage_dir is localhost dir that will be used for storing consul data persistently e.g. ~/consul-storage (no trailing /)
+
+    
+- name: Create a Vault Docker Container from the image
+  docker_container:
+    name: "{{ container_name }}"
+    image: "{{vault_image_name}}:{{ vault_image_version }}"
+    state: started
+    restart_policy: unless-stopped
+    capabilities:
+      - IPC_LOCK
+    memory: 400m
+    memory_swap: 2g
+    restart: "{{ vault_container_restart }}"
+    networks:
+      - name: "{{ docker_network }}"
+    ports: #TODO needs updated to account for load balancer and potentially different port number exposed for each docker container
+      - "{{ host_port }}:{{ container_port }}"
+#      - "443:8200"
+#      - "7300:7300"
+#      - "7301:7301"
+    volumes:
+      - "{{ vault_config_consul_dir }}:/etc/consul" #- "~/vault/config/{{item.key}}-consul.hcl:/etc/consul/consul.hcl"
+      - "{{ vault_config_dir }}:/etc/vault" #-"~/vault/config/{{item.key}}.hcl:/etc/vault/vault.hcl"
+      - "{{ consul_storage_dir }}:/opt/consul-storage" #- "{{ base_vault_dir }}/{{ item.key }}/consul-storage/:/opt/consul-storage"
+      - "{{ vault_host_audit_dir }}:{{ vault_container_audit_dir }}" #- "{{ base_vault_dir }}/{{ item.key }}/audit-logs/:/opt/vault"
+      # - /opt/test-static/nginx/ssl/:/etc/nginx/ssl
+      # - /opt/test-static/public/:/opt/test-static/public

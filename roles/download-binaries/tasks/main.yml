@@ -1,0 +1,28 @@
+---
+
+- name: Create a Directory /tmp/build
+  file:
+    path: "{{ build_dir }}"
+    state: directory
+    mode: 0755
+    owner: "{{ user }}"
+    group: "{{ user }}"
+
+- name: Download Consul using get_url
+  register: consul_binary
+  get_url:
+    url: "{{ hashicorp_consul_url }}{{ hashicorp_consul_version }}/consul_{{hashicorp_consul_version }}_{{ binary_version }}.zip"
+    dest: "{{ build_dir }}/{{ consul_binary }}"
+    mode: 0755
+    checksum: "{{ hashicorp_consul_checksum }}"
+    group: "{{ user }}"
+    owner: "{{ user }}"
+
+- name: Download Vault using get_url
+  get_url:
+    url: "{{ hashicorp_vault_url }}{{ hashicorp_vault_version }}/vault_{{hashicorp_vault_version }}_{{ binary_version }}.zip"
+    dest: "{{ build_dir }}/{{ vault_binary }}"
+    mode: 0755
+    checksum: "{{ hashicorp_vault_checksum }}"
+    group: "{{ user }}"
+    owner: "{{ user }}"

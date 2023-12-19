@@ -1,0 +1,13 @@
+---
+
+display_init_response: true
+tls_skip_verify: true
+vault_secret_shares: 3
+vault_secret_threshold: 2
+vault_tls_disable: true
+vault_port: 8200
+
+vault_root_token_file: ~/vault/root-token.txt
+vault_keys_file: ~/vault/unseal-keys.txt
+vault_root_token: "{{ lookup('file', '~/vault/root-token.txt', errors='ignore') }}" #if already initialised root token may exist in file so read it in so that audit check can be done
+vault_keys: "{{ lookup('file', '~/vault/unseal-keys.txt', errors='ignore') }}" #if already initialised root token may exist in file so read it in so that audit check can be done

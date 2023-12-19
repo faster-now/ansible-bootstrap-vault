@@ -1,0 +1,35 @@
+---
+
+- name: Create the consul certificates and private keys
+  include_tasks: create_consul_certs.yml
+  vars:
+    cert_file: "{{ base_consul_dir }}/{{ item }}/config/consul_cert.pem"
+    key_file: "{{ base_consul_dir }}/{{ item }}/config/consul_key.pem"
+    ca_file: "{{ base_consul_dir }}/{{ item }}/config/ca_cert.pem"
+    alt_names: "{{ item }},server.dc1.consul"
+    cname: "{{ item }}"
+  loop: "{{ consul_servers }}"
+
+- name: Create the vault consul client certificates and private keys
+  include_tasks: create_consul_certs.yml
+  vars:
+    cert_file: "{{ base_vault_dir }}/{{ item.key }}/consul/config/consul_cert.pem"
+    key_file: "{{ base_vault_dir }}/{{ item.key }}/consul/config/consul_key.pem"
+    ca_file: "{{ base_vault_dir }}/{{ item.key }}/consul/config/ca_cert.pem"
+    alt_names: "{{ item.key }}-consul"
+    cname: "{{ item.key }}-consul"
+  with_dict: "{{ vault_servers }}"
+
+- name: Create the vault server certificates and private keys
+  include_tasks: create_vault_certs.yml
+  vars:
+    cert_file: "{{ base_vault_dir }}/{{ item.key }}/vault/config/vault_cert.pem"
+    key_file: "{{ base_vault_dir }}/{{ item.key }}/vault/config/vault_key.pem"
+    ca_file: "{{ base_vault_dir }}/{{ item.key }}/vault/config/ca_cert.pem"
+    alt_names: "{{ item.key }}"
+    cname: "{{ item.key }}"
+  with_dict: "{{ vault_servers }}"
+
+#Now concatenate issuing CA cert to vault server cert
+
+  #TODO same again for Vault servers (Vault & Consul certs)

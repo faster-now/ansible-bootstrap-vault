@@ -1,0 +1,4 @@
+---
+tls_skip_verify: true
+vault_keys_file: ~/vault/unseal-keys.txt
+vault_keys: "{{ lookup('file', '~/vault/unseal-keys.txt', errors='ignore') }}" #if already initialised root token may exist in file so read it in so that audit check can be done

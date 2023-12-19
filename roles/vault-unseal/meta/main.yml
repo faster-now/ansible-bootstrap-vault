@@ -1,0 +1,5 @@
+---
+#Including a dependency this way did not result in the role being called. Must be due to being called elsewhere in another role and Ansible trying to reduce the number of calls
+# dependencies:
+#   - role: fetch-vault-protocol
+#     tags: ['unseal'] #even tried adding a tag to make the call unique but still didnt result in role being called

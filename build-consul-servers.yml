@@ -1,0 +1,70 @@
+---
+- hosts: all
+
+    #force_fetch: true #Assume consul will be built first and force fetch of build files
+
+  gather_facts: no
+  remote_user: "{{ user }}"
+  become: no
+
+  #"{{ base_dir }}/{{ consul_build_files_dir }}/{{ consul_servers[0] }}"
+  tasks:
+    - name: Init consul config and build files
+      include_role:
+        name: init-build-files
+      vars:
+        force_fetch: true
+      #vars: #try this to see if vars from top level play are passed in
+        #base_dir: "{{ base_dir }}"
+        #vault_config_dir: 
+        #consul_config_dir:
+
+    # - name: Init consul config and build files
+    #   include_role:
+    #     name: init-build-files
+    #   vars:
+    #     temp_build_dir: /tmp/build/consul
+    #     dest_config_dir: ~/consul
+    #     dest_build_dir: ~/consul-build
+
+    - name: Create local persistent storage directory for Consul servers (in preparation for Docker volume)
+      file:
+        path: "{{ base_consul_dir }}/{{ item }}/consul-storage"
+        state: directory
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: 0775
+      loop: "{{ consul_servers }}"
+
+    - name: Build a Consul image
+      docker_image:
+        build:
+          path: "{{ base_dir }}/{{ consul_build_files_dir }}" #Dockerfile for Consul build should be in user dir/ansible-build subfolder
+        name: "{{ consul_image_name }}"
+        tag: v1
+        force_source: yes
+        #push: yes
+        source: build
+      #delegate_to: 127.0.0.1
+      #become: no
+
+    - name: Create a docker network
+      docker_network:
+        name: "{{ docker_network }}"
+
+    # - name: Create consul docker containers
+    #   include_role:
+    #     name: consul-container-restart
+    #   vars:
+    #     container_name: "{{ consul_server }}"
+    #     consul_image_version: "v1"
+    #     consul_config_dir: "{{ base_consul_dir }}/{{ consul_server }}/config"
+    #     consul_storage_dir: "{{ base_consul_dir }}/{{ consul_server }}/consul-storage"
+    #     container_restart: yes
+    #   loop: "{{ consul_servers }}"
+    #   loop_control:
+    #     loop_var: consul_server
+
+    - name: (Re)start consul docker containers
+      include_role:
+        name: consul-container-restart-all

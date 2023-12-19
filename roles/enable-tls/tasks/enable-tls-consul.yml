@@ -1,0 +1,89 @@
+---
+
+- name: Set the consul config to use TLS
+  lineinfile:
+    dest: "{{ config_file }}"
+    regexp: "{{ config_text.regexp }}"
+    line: "{{ config_text.line }}"
+    backrefs: true
+  loop:
+    - { regexp: '^#ca_file\s(.*?)$', line: 'ca_file  \1' }
+    - { regexp: '^#cert_file\s(.*?)$', line: 'cert_file  \1' }
+    - { regexp: '^#key_file\s(.*?)$', line: 'key_file  \1' }
+    - { regexp: '^#verify_incoming\s(.*?)$', line: 'verify_incoming  \1' }
+    - { regexp: '^#verify_outgoing\s(.*?)$', line: 'verify_outgoing  \1' }
+    - { regexp: '^#verify_server_hostname\s(.*?)$', line: 'verify_server_hostname  \1' }
+  loop_control:
+    loop_var: config_text
+
+# - name: Update consul server configuration to use the certificate and key files
+#   lineinfile:
+#     path: "{{ base_consul_dir }}/{{ item }}.hcl" #Add to all config files
+#     regexp: "^#ca_file\s(.*?)$"
+#     line: 'ca_file\s\1'
+#   #notify: Restart Consul #even though in a loop, will only result in one restart
+#   loop: "{{consul_servers}}"
+
+#   - name: Update consul server configuration to use the certificate and key files
+#   lineinfile:
+#     path: "{{ base_consul_dir }}/{{ item }}.hcl" #Add to all config files
+#     regexp: "^#ca_file\s(.*?)$"
+#     line: 'ca_file\s\1'
+#   #notify: Restart Consul #even though in a loop, will only result in one restart
+#   loop: "{{consul_servers}}"
+
+#   - name: Update consul server configuration to use the certificate and key files
+#   lineinfile:
+#     path: "{{ base_consul_dir }}/{{ item }}.hcl" #Add to all config files
+#     regexp: "^#ca_file\s(.*?)$"
+#     line: 'ca_file\s\1'
+#   #notify: Restart Consul #even though in a loop, will only result in one restart
+#   loop: "{{consul_servers}}"
+
+#   - name: Update consul client configuration to use the certificate and key files
+#   lineinfile:
+#     path: "{{ base_vault_dir }}/{{ item.key }}-consul.hcl" #Add to all config files
+#     regexp: "^#ca_file\s(.*?)$"
+#     line: 'ca_file\s\1'
+#   #notify: Restart Consul #even though in a loop, will only result in one restart
+#   with_dict: "{{vault_servers}}"
+
+# - name: Write consul certificate to file
+#   copy:
+#     content: "{{ consul_certs_and_keys.data.data.certificate }}"
+#     dest: "{{ cert_file }}"
+
+# - name: Write consul private key to file
+#   copy:
+#     content: "{{ consul_certs_and_keys.data.data.private_key }}"
+#     dest: "{{ key_file }}"
+
+# - name: Write ca cert to file
+#   copy:
+#     content: "{{ consul_certs_and_keys.data.data.issuing_ca }}"
+#     dest: "{{ ca_file }}"
+
+# - name: Update consul server configuration to use the certificate and key files
+#   lineinfile:
+#     path: "~/consul/{{ item }}.hcl" #Add to all config files
+#     regexp: "^#ca_file\s(.*?)$"
+#     line: 'ca_file\s\1'
+#   #notify: Restart Consul #even though in a loop, will only result in one restart
+#   loop: "{{consul_servers}}"
+
+# handlers:
+#   - name: Restart Consul
+#       docker_container:
+#         name: "{{ item }}"
+#         image: "{{consul_image_name}}:v1"
+#         state: started
+#         restart_policy: unless-stopped
+#         restart: yes
+#         networks:
+#           - name: "{{ docker_network }}"
+#         volumes:
+#           - "~/consul/{{item}}.hcl:/etc/consul/consul.hcl"
+#           - "~/consul-storage/{{item}}/:/opt/consul-storage"
+#       loop: "{{consul_servers}}"
+
+#TODO update config files then restart containers

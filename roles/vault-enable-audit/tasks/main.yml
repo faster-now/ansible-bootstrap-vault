@@ -1,0 +1,47 @@
+---
+
+#is_https and vault_port come from dependent role
+- name: Setting the Vault URL
+  set_fact:
+    vault_addr: "{{ is_https | ternary('https', 'http') }}://{{ inventory_hostname }}:{{ vault_port }}"
+
+- name: Check if file audit is enabled
+  uri:
+    url: "{{ vault_addr }}/v1/sys/audit"
+    headers: 
+      X-Vault-Token: "{{ vault_root_token }}"
+    validate_certs: "{{ tls_skip_verify | ternary('false', 'true') }}"
+    status_code: 200,500
+    return_content: yes
+  register: file_audit_response
+  run_once: true  
+  when:
+    - vault_root_token is defined
+    - vault_root_token|length > 0
+  delay: 3 #every 5 seconds
+  retries: 12 #12*3 = circa half a minute
+  until: ('status' in file_audit_response) and (file_audit_response.status != -1) and (file_audit_response.status != 500)
+
+# - name: audit response
+#   debug:
+#     msg: "{{ file_audit_response }}"    
+
+- name: Enable audit to file/disk
+  uri:
+    url: "{{ vault_addr }}/v1/sys/audit/file"
+    headers: 
+      X-Vault-Token: "{{ vault_root_token }}"
+    body:
+      type: file
+      options:
+        file_path: "{{ vault_container_audit_dir }}/audit.log"
+    body_format: json
+    method: PUT
+    validate_certs: "{{ tls_skip_verify | ternary('false', 'true') }}"
+    status_code: 200,204
+  register: enable_file_audit
+  run_once: true
+  when:
+    - file_audit_response.status == 200
+    - file_audit_response.json.data|length == 0
+    
