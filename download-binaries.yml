@@ -11,6 +11,13 @@
      
 - hosts: consul:vault
   tasks:
+    - name: Create a directory /tmp/build
+      file:
+        path: "{{ build_dir }}"
+        state: directory
+        mode: 0755
+        owner: "{{ user }}"
+        group: "{{ user }}"
     - ansible.builtin.copy:
         src: "{{ build_dir }}/{{ consul_binary }}"
         dest: "{{ build_dir }}/{{ consul_binary }}"
