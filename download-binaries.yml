@@ -9,6 +9,7 @@
       include_role:
         name: download-binaries
     - name: Install zip  (state=present is optional)
+      become: true
       ansible.builtin.apt:
         name: zip
         state: present
