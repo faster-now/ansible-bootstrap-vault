@@ -21,9 +21,19 @@
     - ansible.builtin.copy:
         src: "{{ build_dir }}/{{ consul_binary }}"
         dest: "{{ build_dir }}/{{ consul_binary }}"
+    - name: Unarchive a file that is already on the remote machine
+      ansible.builtin.unarchive:
+        src: "{{ build_dir }}/{{ consul_binary }}"
+        dest: "{{ build_dir }}" #/usr/local/bin
+        remote_src: yes
 
 - hosts: vault
   tasks:
     - ansible.builtin.copy:
         src: "{{ build_dir }}/{{ vault_binary }}" #local location of binary
         dest: "{{ build_dir }}/{{ vault_binary }}" #store in same location with same name on the remote
+    - name: Unarchive a file that is already on the remote machine
+      ansible.builtin.unarchive:
+        src: "{{ build_dir }}/{{ vault_binary }}"
+        dest: "{{ build_dir }}" #/usr/local/bin
+        remote_src: yes
