@@ -8,20 +8,28 @@
     - name: Download the Hashicorp Vault and Consul binaries to use for the install
       include_role:
         name: download-binaries
+
     - name: Install zip  (state=present is optional)
       become: true
       ansible.builtin.apt:
         name: zip
         state: present
+
     - name: Unarchive Consul binary
       ansible.builtin.unarchive:
         src: "{{ build_dir }}/{{ consul_binary }}.zip"
         dest: "{{ build_dir }}" #/usr/local/bin
         remote_src: yes
+        list_files: yes
+      register: unpacked_consul
+
     - name: Unarchive Vault binary
       ansible.builtin.unarchive:
         src: "{{ build_dir }}/{{ vault_binary }}.zip"
-        dest: "{{ build_dir }}/{{ vault_binary }}" #/usr/local/bin
+        dest: "{{ build_dir }}" #/usr/local/bin
+        remote_src: yes
+        list_files: yes
+      register: unpacked_vault
      
 - hosts: consul:vault
   tasks:
@@ -33,13 +41,13 @@
         owner: "{{ user }}"
         group: "{{ user }}"
     - ansible.builtin.copy:
-        src: "{{ build_dir }}/{{ consul_binary }}"
+        src: "{{ build_dir }}/consul"
         dest: "{{ build_dir }}/{{ consul_binary }}"
 
 - hosts: vault
   tasks:
     - ansible.builtin.copy:
-        src: "{{ build_dir }}/{{ vault_binary }}" #local location of binary
+        src: "{{ build_dir }}/vault" #{{ unpacked_vault.files[0] }}" #local location of binary tried grabbing file list however register doesnt work between plays
         dest: "{{ build_dir }}/{{ vault_binary }}" #store in same location with same name on the remote
     # - name: Unarchive a file that is already on the remote machine
     #   ansible.builtin.unarchive:
