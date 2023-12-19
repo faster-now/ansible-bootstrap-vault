@@ -9,7 +9,6 @@
     group: "{{ user }}"
 
 - name: Download Consul using get_url
-  register: consul_binary
   get_url:
     url: "{{ hashicorp_consul_url }}{{ hashicorp_consul_version }}/consul_{{hashicorp_consul_version }}_{{ binary_version }}.zip"
     dest: "{{ build_dir }}/{{ consul_binary }}.zip"

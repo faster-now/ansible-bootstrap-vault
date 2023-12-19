@@ -13,14 +13,11 @@
       ansible.builtin.apt:
         name: zip
         state: present
-    - name: Unarchive a file that is already on the remote machine
-      ansible.builtin.unarchive:
-        src: "{{ build_dir }}/{{ consul_binary }}.zip"
-        dest: "{{ build_dir }}" #/usr/local/bin
     - name: Unarchive Consul binary
       ansible.builtin.unarchive:
         src: "{{ build_dir }}/{{ consul_binary }}.zip"
-        dest: "{{ build_dir }}/{{ consul_binary }}" #/usr/local/bin
+        dest: "{{ build_dir }}" #/usr/local/bin
+        remote_src: yes
     - name: Unarchive Vault binary
       ansible.builtin.unarchive:
         src: "{{ build_dir }}/{{ vault_binary }}.zip"
