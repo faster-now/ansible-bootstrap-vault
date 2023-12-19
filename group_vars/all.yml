@@ -14,5 +14,5 @@ hashicorp_vault_checksum: "sha256:f4825bad06e77687b407eff7423acb9238adfd545d7345
 
 binary_version: linux_amd64
 
-consul_binary: "consul_{{hashicorp_consul_version }}_{{ binary_version }}.zip"
-vault_binary: "vault_{{hashicorp_vault_version }}_{{ binary_version }}.zip"
+consul_binary: "consul_{{hashicorp_consul_version }}_{{ binary_version }}"
+vault_binary: "vault_{{hashicorp_vault_version }}_{{ binary_version }}"

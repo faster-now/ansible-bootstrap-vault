@@ -12,7 +12,7 @@
   register: consul_binary
   get_url:
     url: "{{ hashicorp_consul_url }}{{ hashicorp_consul_version }}/consul_{{hashicorp_consul_version }}_{{ binary_version }}.zip"
-    dest: "{{ build_dir }}/{{ consul_binary }}"
+    dest: "{{ build_dir }}/{{ consul_binary }}.zip"
     mode: 0755
     checksum: "{{ hashicorp_consul_checksum }}"
     group: "{{ user }}"
@@ -21,7 +21,7 @@
 - name: Download Vault using get_url
   get_url:
     url: "{{ hashicorp_vault_url }}{{ hashicorp_vault_version }}/vault_{{hashicorp_vault_version }}_{{ binary_version }}.zip"
-    dest: "{{ build_dir }}/{{ vault_binary }}"
+    dest: "{{ build_dir }}/{{ vault_binary }}.zip"
     mode: 0755
     checksum: "{{ hashicorp_vault_checksum }}"
     group: "{{ user }}"
