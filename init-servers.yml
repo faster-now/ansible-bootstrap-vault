@@ -4,6 +4,23 @@
   remote_user: "{{ user }}"
   become: yes
   vars:
+    - os_environment:
+      - key: CONSUL_HTTP_ADDR
+        value: http://127.0.0.1:7500
+  tasks:
+    - name: populate /etc/environment (permanent env var set)
+      lineinfile:
+        path: "/etc/environment"
+        state: present
+        regexp: "^{{ item.key }}="
+        line: "{{ item.key }}={{ item.value}}"
+      with_items: "{{ os_environment }}"
+
+- hosts: vault:consul
+  gather_facts: no
+  remote_user: "{{ user }}"
+  become: yes
+  vars:
     - new_user: "{{ consul_user }}"
     - new_group: "{{ consul_user }}"
     - base_user: "{{ user }}"
@@ -13,6 +30,7 @@
     - name: Create new user and group on Consul servers and software folders
       include_role:
         name: init-servers
+    
 
 #Copy Consul server config file to Consul servers
 - hosts: consul
@@ -23,7 +41,7 @@
   - name: Copy the Consul server config file from build pack location to config folder on server
     ansible.builtin.copy:
       src: "config-files/consul.hcl" #"{{ build_dir }}/{{ service_filename }}"
-      dest: "/etc/{{ consul_user }}.d/consul.hcl" #must match folder name created in the role above
+      dest: "{{ consul_config_dir }}{{ consul_config_filename }}" #must match folder name created in the role above
       mode: 0640
       owner: "{{ consul_user }}"
       group: "{{ consul_user }}"
@@ -52,7 +70,7 @@
   - name: Copy the Consul client config file from build pack location to config folder on Vault servers
     ansible.builtin.copy:
       src: "config-files/vault-consul.hcl" #"{{ build_dir }}/{{ service_filename }}"
-      dest: "/etc/{{ consul_user }}.d/consul.hcl" #must match folder name created in the role above
+      dest: "{{ consul_config_dir }}{{ consul_config_filename }}" #must match folder name created in the role above
       mode: 0640
       owner: "{{ consul_user }}"
       group: "{{ consul_user }}"
@@ -66,7 +84,7 @@
   - name: Copy the Vault server config file from build pack location to config folder on Vault servers
     ansible.builtin.copy:
       src: "config-files/vault.hcl" #"{{ build_dir }}/{{ service_filename }}"
-      dest: "/etc/{{ vault_user }}.d/vault.hcl" #must match folder name created in the role above
+      dest: "{{ vault_config_dir }}{{ vault_config_filename }}" #must match folder name created in the role above
       mode: 0640
       owner: "{{ vault_user }}"
       group: "{{ vault_user }}"

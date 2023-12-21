@@ -6,5 +6,5 @@ consul_servers:
 consul_image_name: my-consul
 consul_build_files_dir: consul-files
 base_consul_dir: ~/consul
-consul_config_dir: "{{ base_consul_dir }}/config"
+#consul_config_dir: "{{ base_consul_dir }}/config"
 consul_container_config_dir: "/etc/consul"

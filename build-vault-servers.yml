@@ -1,177 +1,48 @@
 ---
-- hosts: all
-  vars:
-    docker_network: vault_net
-    user: azureuser
-    vault_servers: #use dict so a port number can be specified for each vault server to facilitate running multiple containers on a single host
-      vault-a: 8200
-      vault-b: 8800
-    vault_containers: #use to create and start containers on limited resource host (free tier on cloud providers cant cope with 5 containers)
-      vault-a: 8200
-      #vault-b: 8800 #remove this if the host cant cope with all 5 containers
+# - hosts: consul:vault
+#   gather_facts: no
+#   remote_user: "{{user}}"
+#   become: no
+#   tasks:
 
-    vault_image_name: my-vault
-    #temp_build_dir: /tmp/build/vault
-    base_vault_dir: ~/vault
-    vault_container_audit_dir: /opt/vault
-  gather_facts: no
-  remote_user: "{{user}}"
-  become: no
-  tasks:
-    # - name: Check if the temp build directory exists
-    #   ansible.builtin.stat:
-    #     path: "{{ temp_build_dir }}"
-    #   register: dir_to_check
+#     - name: Enable consul layer gossip encryption
+#       include_role:
+#         name: consul-enable-encryption
 
-    # - block: #Only perform this block where the vault build dir actually exists
-    #   - name: Copy vault & consul client config files from temp build dir to persistant storage location (ready for Docker volume)
-    #     copy:
-    #       src: "{{ item.key }}"
-    #       dest: ~/vault/config/ #trailing / means directory will be created where doesnt already exist
-    #     with_fileglob:
-    #       - "{{ temp_build_dir }}/*.hcl"
-    #   - name: Delete temp build vault & consul config files
-    #     file:
-    #       state: absent
-    #       path: "{{ item.key }}"
-    #     with_fileglob:
-    #       - "{{ temp_build_dir }}/*.hcl"
+# - hosts: consul:vault
+#   gather_facts: no
+#   remote_user: "{{user}}"
+#   become: yes
+#   tasks:
 
-    #   - name: Copy vault build files to build dir
-    #     copy:
-    #       src: "{{ item.key }}"
-    #       dest: ~/vault-build/ #trailing / means directory will be created where doesnt already exist
-    #     with_fileglob:
-    #       - "{{ temp_build_dir }}/*"
-    #   - name: Delete temp build vault directory
-    #     file:
-    #       state: absent
-    #       path: "{{ temp_build_dir }}/"
-    #   when: dir_to_check.stat.isdir is defined and dir_to_check.stat.isdir
+#     - name: Restart Consul service
+#       ansible.builtin.service:
+#         name: "{{ consul_user }}"
+#         state: restarted
+#         daemon_reload: true
 
-    - name: First vault playbook task
-      debug:
-        msg: "{{ vault_image_name }}"
-
-    # Check if dir exists first as using the standard approach as used below for audit-logs seemed to stall/hang the playbook run sometimes.
-    # Therefore check if exists first and only create it if not
-    - name: Check if local persistent storage directory for Vault servers exists
-      stat:
-        path: "{{ base_vault_dir }}/{{ item.key }}/consul-storage"
-      register: file_details
-      with_dict: "{{ vault_servers }}"
-
-    #This is flawed since the path doesnt exist where the directory doesnt already exist
-    # - name: Create local persistent storage directory for Vault servers (in preparation for Docker volume)
-    #   file:
-    #     path: "{{ item.stat.path }}"
-    #     state: directory
-    #     owner: "{{user}}"
-    #     group: "{{user}}"
-    #     mode: 0775
-    #   with_items: "{{ file_details.results }}"
-    #   when:
-    #     - not item.stat.exists
-
-    - name: Create local persistent storage directory for Vault servers (in preparation for Docker volume)
-      file:
-        path: "{{ base_vault_dir }}/{{ item.key }}/consul-storage"
-        state: directory
-        owner: "{{user}}"
-        group: "{{user}}"
-        mode: 0775
-      with_dict: "{{ vault_servers }}"      
-
-    - name: Create persistent storage directory for Vault audit logs (ready for Docker volume)
-      become: true
-      file:
-        path: "{{ base_vault_dir }}/{{ item.key }}/audit-logs"
-        state: directory
-        owner: "{{user}}"
-        group: "{{user}}"
-        mode: 0775
-      with_dict: "{{ vault_servers }}"
-
-    # - name: Create persistent storage directory for Vault config (ready for Docker volume)
-    #   file:
-    #     path: "~/vault/config/{{item}}"
-    #     state: directory
-    #     owner: "{{user}}"
-    #     group: "{{user}}"
-    #     mode: 0775
-    #   loop: "{{vault_servers}}"
-
-    - name: Build a Vault image
-      docker_image:
-        build:
-          path: ~/vault-build #Dockerfile for Vault build should be in user dir/vault-build subfolder
-        name: "{{vault_image_name}}"
-        tag: v1
-        force_source: yes
-        #push: yes
-        source: build
-      #delegate_to: 127.0.0.1
-      #become: no
-
-    #Docker network should already exist from Consul server layer provisioning prior to this but will be created here if not already
-    - name: Create a docker network
-      docker_network:
-        name: "{{ docker_network }}"
     
-    # - name: Now create a Vault Docker Container from the image
-    #   docker_container:
-    #     name: "{{ item.key }}"
-    #     image: "{{vault_image_name}}:v1"
-    #     state: started
-    #     restart_policy: unless-stopped
-    #     capabilities:
-    #       - IPC_LOCK
-    #     memory: 400m
-    #     memory_swap: 2g
-    #     networks:
-    #       - name: "{{ docker_network }}"
-    #     ports: #TODO needs updated to account for load balancer and potentially different port number exposed for each docker container
-    #       - "{{ item.value }}:{{ item.value }}"
-    # #      - "443:8200"
-    # #      - "7300:7300"
-    # #      - "7301:7301"
-    #     volumes:
-    #       - "~/vault/config/{{item.key}}-consul.hcl:/etc/consul/consul.hcl"
-    #       - "~/vault/config/{{item.key}}.hcl:/etc/vault/vault.hcl"
-    #       - "{{ base_vault_dir }}/{{ item.key }}/consul-storage/:/opt/consul-storage"
-    #       - "{{ base_vault_dir }}/{{ item.key }}/audit-logs/:/opt/vault"
-    #       # - /opt/test-static/nginx/ssl/:/etc/nginx/ssl
-    #       # - /opt/test-static/public/:/opt/test-static/public
-    #   with_dict: "{{ vault_servers }}"
 
-    - name: Create vault docker containers
-      include_role:
-        name: vault-container-restart-all
+    # - name: Initialise Vault
+    #   include_role:
+    #     name: vault-init
 
-    - name: Enable consul layer gossip encryption
-      include_role:
-        name: consul-enable-encryption
+    # - name: Unseal Vault
+    #   include_role:
+    #     name: vault-unseal
 
-    - name: Initialise Vault
-      include_role:
-        name: vault-init
-
-    - name: Unseal Vault
-      include_role:
-        name: vault-unseal
-
-    - name: Enable Vault audit logs
-      include_role:
-        name: vault-enable-audit
+    # - name: Enable Vault audit logs
+    #   include_role:
+    #     name: vault-enable-audit
     
-    - name: Bootstrap AppRole
-      include_role:
-        name: bootstrap-approle
+    # - name: Bootstrap AppRole
+    #   include_role:
+    #     name: bootstrap-approle
 
-    - name: Create CAs
-      include_role:
-        name: create-issuing-ca
+    # - name: Create CAs
+    #   include_role:
+    #     name: create-issuing-ca
 
-    - name: Enable TLS
-      include_role:
-        name: enable-tls
+    # - name: Enable TLS
+    #   include_role:
+    #     name: enable-tls

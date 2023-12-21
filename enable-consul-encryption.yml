@@ -1,0 +1,63 @@
+---
+- hosts: ansible
+  gather_facts: no
+  remote_user: "{{ user }}"
+  become: no
+  vars:
+    force_regen: false #force a new encryption key generation even if there is already an existing one
+  tasks:
+    - name: Check if there is an existing gossip encryption key
+      ansible.builtin.command: /usr/local/bin/consul keyring -list
+      ignore_errors: true #an error is returned when encryption is not set, simply ignore
+      register: consul_keyring_results
+      when:
+        - not force_regen
+
+    #regex: find (LAN):\\n  nf5dadwgfs/klsdfj= [3/3] (find (LAN): followed by one or more newlines then any whitespace then what should be the key (any char but reluctant qualifier to take as small a sample as it can) followed by a single whitespace then a square open bracket)
+    - set_fact:
+        existing_consul_enc_key: "{{ consul_keyring_results | regex_search('\\(LAN\\):(\\\\n)+(\\s)*(?P<key>.*?)\\s\\[', '\\g<key>') | first }}"
+      when: consul_keyring_results.stderr | length < 1
+      #   - consul_keyring_results is defined
+      #   - consul_keyring_results | length > 0
+
+    - name: Generate a new consul encryption key
+      ansible.builtin.command: consul keygen
+      register: new_consul_enc_key_result
+      when:
+        - (not existing_consul_enc_key is defined or existing_consul_enc_key | length < 1) or force_regen
+        #- consul_keyring_results.json.Keys.key|length < 1 or regenerate
+
+    - set_fact:
+        consul_enc_key_value: "{{ (existing_consul_enc_key is defined and existing_consul_enc_key | length > 1) | ternary(existing_consul_enc_key, new_consul_enc_key_result.stdout) }}"
+
+    #https://stackoverflow.com/questions/33896847/how-do-i-register-a-variable-and-persist-it-between-plays-targeted-on-different
+    - name: Dummy host to persist key value so its accessible in next play with different hosts
+      add_host:
+        name:   "consul_enc_key"
+        value:  "{{ consul_enc_key_value }}"
+        force_regen:   "{{ force_regen }}"
+        already_exists: "(existing_consul_enc_key is defined and existing_consul_enc_key | length > 0)"
+
+- hosts: consul:vault
+  gather_facts: no
+  remote_user: "{{ user }}"
+  become: yes
+  vars:
+    consul_enc_key_val: "{{ hostvars['consul_enc_key']['value'] }}"
+  tasks:
+    - name: Enable consul layer gossip encryption
+      include_role:
+        name: consul-enable-encryption
+      vars:
+        consul_enc_key_value: "{{ consul_enc_key_val }}"
+      # when: #thinking about this, the query is against the keyring not the files, so files may(will) need updated with keyring value
+      #   - not hostvars['consul_enc_key']['already_exists'] or hostvars['consul_enc_key']['force_regen']
+
+    - name: Restart Consul service
+      ansible.builtin.service:
+        name: "{{ consul_user }}"
+        state: restarted
+        daemon_reload: true
+# when force_regen or existing_key is empty
+  #generate new key on one host
+    #position new key on all hosts

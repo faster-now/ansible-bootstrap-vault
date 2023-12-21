@@ -1,4 +1,6 @@
 ---
-- import_playbook: download-binaries.yml
-- import_playbook: build-consul-servers.yml
-- import_playbook: build-vault-servers.yml
+- import_playbook: fetch-binaries.yml
+- import_playbook: init-servers.yml
+- import_playbook: enable-consul-encryption.yml
+#- import_playbook: build-consul-servers.yml
+#- import_playbook: build-vault-servers.yml
