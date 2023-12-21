@@ -9,11 +9,11 @@
 #       include_role:
 #         name: consul-enable-encryption
 
-# - hosts: consul:vault
-#   gather_facts: no
-#   remote_user: "{{user}}"
-#   become: yes
-#   tasks:
+- hosts: ansible
+  gather_facts: no
+  remote_user: "{{user}}"
+  become: no
+  tasks:
 
 #     - name: Restart Consul service
 #       ansible.builtin.service:
@@ -23,9 +23,9 @@
 
     
 
-    # - name: Initialise Vault
-    #   include_role:
-    #     name: vault-init
+    - name: Initialise Vault
+      include_role:
+        name: vault-init
 
     # - name: Unseal Vault
     #   include_role:
