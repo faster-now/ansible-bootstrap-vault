@@ -44,9 +44,7 @@
       ansible.builtin.copy:
         src: "{{ build_dir }}/consul"
         dest: "{{ build_dir }}/{{ consul_binary }}"
-        mode: 0751
-        user: "{{ consul_user }}" #user must have been created first
-        group: "root"
+        
 
 - hosts: vault
   tasks:
@@ -54,10 +52,7 @@
       ansible.builtin.copy:
         src: "{{ build_dir }}/vault" #{{ unpacked_vault.files[0] }}" #local location of binary tried grabbing file list however register doesnt work between plays
         dest: "{{ build_dir }}/{{ vault_binary }}" #store in same location with same name on the remote
-        mode: 0751
-        user: "{{ vault_user }}" #user must have been created first
-        group: "root"
-        
+
     # - name: Unarchive a file that is already on the remote machine
     #   ansible.builtin.unarchive:
     #     src: "{{ build_dir }}/{{ vault_binary }}.zip"

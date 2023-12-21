@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: vault:consul
   gather_facts: no
   remote_user: "{{ user }}"
   become: yes
@@ -70,3 +70,16 @@
       mode: 0640
       owner: "{{ vault_user }}"
       group: "{{ vault_user }}"
+
+- hosts: vault:consul
+  gather_facts: no
+  remote_user: "{{ user }}"
+  become: yes
+  tasks:
+    - name: Enable consul service and start
+      ansible.builtin.service:
+        name: "{{ consul_user }}"
+        enabled: yes
+        state: started
+        daemon_reload: true
+  

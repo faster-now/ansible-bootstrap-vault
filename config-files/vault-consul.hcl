@@ -1,8 +1,8 @@
 #Generic file that can be used by all 3 Consul server instances. This configures all instances to use the same ports and thus requires use of a docker bridge network so each instance has a different IP
 
 server                      = false
-data_dir                    = "/opt/consul-storage"
-retry_join                  = ["consul-a","consul-b","consul-c"] #Seems like its only required for initial deployment/creation (Once it joins successfully to a member in a list of members it will never attempt to join again. Agents will then solely maintain their membership via gossip)
+data_dir                    = "/opt/consul"
+retry_join                  = ["consul-a","consul-b"] #Seems like its only required for initial deployment/creation (Once it joins successfully to a member in a list of members it will never attempt to join again. Agents will then solely maintain their membership via gossip)
 #performance {              #low performance VM host means must choose a low peformance value (default is 5 which is the lowest)
 #    raft_multiplier         = 1
 #}

@@ -1,5 +1,6 @@
 ---
-#Note: Uses username for config file name e.g. consul or consul-storage etc
+#Note: Uses username for config file name e.g. consul or consul-storage etc/
+#Expects the Hashicorp binaries to have been downloaded to the controller server first!
 
 - name: Create new group
   ansible.builtin.group:
@@ -48,7 +49,7 @@
 - name: Copy the binary from the build folder to the local binaries folder
   ansible.builtin.copy:
     src: "{{ build_dir }}/{{ binary_filename }}"
-    dest: "/usr/local/bin/{{ binary_filename }}" #This location already exists in Linux buld by default
+    dest: "/usr/local/bin/{{ binary_filename.split('_').0 }}" #This location already exists in Linux buld by default. (expected filename is e.g. consul_xxx_yy, dest file uses just the program name)
     remote_src: yes
     mode: 0751
     owner: "{{ new_user }}"
@@ -68,10 +69,10 @@
   lineinfile:
     path: "/etc/systemd/system/{{ service_filename }}" #"/etc/{{ new_user }}.d/{{ new_user }}.hcl"
     regexp: "^User=*"
-    line: "User={{ new_user }} #updated by Ansible"
+    line: "User={{ new_user }}"
   
 - name: Update group in service file
   lineinfile:
     path: "/etc/systemd/system/{{ service_filename }}"
     regexp: "^Group=*"
-    line: "Group={{ new_group }} #updated by Ansible"
+    line: "Group={{ new_group }}"

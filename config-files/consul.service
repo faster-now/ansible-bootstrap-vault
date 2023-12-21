@@ -8,7 +8,7 @@ ConditionFileNotEmpty=/etc/consul.d/consul.hcl
 [Service]
 User=consul
 Group=consul
-ExecStart=/usr/bin/consul agent -config-file=/etc/consul.d/consul.hcl
+ExecStart=/usr/local/bin/consul agent -config-file=/etc/consul.d/consul.hcl
 ExecReload=/usr/local/bin/consul reload
 KillMode=process
 KillSignal=SIGTERM
