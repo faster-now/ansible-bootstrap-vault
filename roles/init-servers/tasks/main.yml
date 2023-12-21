@@ -1,0 +1,43 @@
+---
+- name: Create new group
+  ansible.builtin.group:
+    name: "{{ new_group }}"
+    state: present
+
+- name: Create new user
+  ansible.builtin.user:
+    name: "{{ new_user }}"
+    group: "{{ new_group }}"
+    expires: -1
+
+- name: Create .ssh folder
+  file:
+    path: "~{{ new_user }}/.ssh"
+    state: directory
+    owner: "{{ new_user }}"
+    group: "{{ new_group }}"
+    mode: 0700
+
+- name: Copy existing SSH key from base user (new user uses same key then)
+  copy:
+    src: "~{{ base_user }}/.ssh/authorized_keys"
+    dest: "~{{ new_user }}/.ssh/authorized_keys"
+    owner: "{{ new_user }}"
+    group: "{{ new_group }}"
+    mode: 0700
+
+- name: Create etc d config folder
+  file:
+    path: "/etc/{{ new_user }}.d"
+    state: directory
+    owner: "{{ new_user }}"
+    group: "{{ new_group }}"
+    mode: 0750
+  
+- name: Create opt software folder
+  file:
+    path: "/opt/{{ new_user }}"
+    state: directory
+    owner: "{{ new_user }}"
+    group: "{{ new_group }}"
+    mode: 0750

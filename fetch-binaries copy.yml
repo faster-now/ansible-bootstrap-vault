@@ -5,9 +5,9 @@
   become: no
 
   tasks:
-    - name: Download the Hashicorp Vault and Consul binaries to use for the install
+    - name: Fetch the Hashicorp Vault and Consul binaries to use for the install, unzip and copy to servers
       include_role:
-        name: download-binaries
+        name: fetch-binaries
 
     - name: Install zip  (state=present is optional)
       become: true
@@ -40,13 +40,15 @@
         mode: 0755
         owner: "{{ user }}"
         group: "{{ user }}"
-    - ansible.builtin.copy:
+    - name: Copy the Consul binary to all servers
+      ansible.builtin.copy:
         src: "{{ build_dir }}/consul"
         dest: "{{ build_dir }}/{{ consul_binary }}"
 
 - hosts: vault
   tasks:
-    - ansible.builtin.copy:
+    - name: Copy the Vault binary to the Vault servers
+      ansible.builtin.copy:
         src: "{{ build_dir }}/vault" #{{ unpacked_vault.files[0] }}" #local location of binary tried grabbing file list however register doesnt work between plays
         dest: "{{ build_dir }}/{{ vault_binary }}" #store in same location with same name on the remote
     # - name: Unarchive a file that is already on the remote machine

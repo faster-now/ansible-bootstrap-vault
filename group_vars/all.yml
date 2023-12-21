@@ -16,3 +16,6 @@ binary_version: linux_amd64
 
 consul_binary: "consul_{{hashicorp_consul_version }}_{{ binary_version }}"
 vault_binary: "vault_{{hashicorp_vault_version }}_{{ binary_version }}"
+
+vault_user: "vault" #The account that will be created and used to run Vault
+consul_user: "consul" #The account that will be created and used to run Consul
