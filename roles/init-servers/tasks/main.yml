@@ -1,4 +1,6 @@
 ---
+#Note: Uses username for config file name e.g. consul or consul-storage etc
+
 - name: Create new group
   ansible.builtin.group:
     name: "{{ new_group }}"
@@ -41,3 +43,35 @@
     owner: "{{ new_user }}"
     group: "{{ new_group }}"
     mode: 0750
+
+#copy binary to usr/local/bin and set permissions
+- name: Copy the binary from the build folder to the local binaries folder
+  ansible.builtin.copy:
+    src: "{{ build_dir }}/{{ binary_filename }}"
+    dest: "/usr/local/bin/{{ binary_filename }}" #This location already exists in Linux buld by default
+    remote_src: yes
+    mode: 0751
+    owner: "{{ new_user }}"
+    group: "root"
+
+#copy systemd service file
+- name: Copy the unit service file from the build folder to the system location
+  ansible.builtin.copy:
+    src: "config-files/{{ service_filename }}" #"{{ build_dir }}/{{ service_filename }}"
+    dest: "/etc/systemd/system/{{ service_filename }}"
+    mode: 0644
+    owner: "root"
+    group: "root"
+
+#Update systemd service file with the user and group being created
+- name: Update user in service file
+  lineinfile:
+    path: "/etc/systemd/system/{{ service_filename }}" #"/etc/{{ new_user }}.d/{{ new_user }}.hcl"
+    regexp: "^User=*"
+    line: "User={{ new_user }} #updated by Ansible"
+  
+- name: Update group in service file
+  lineinfile:
+    path: "/etc/systemd/system/{{ service_filename }}"
+    regexp: "^Group=*"
+    line: "Group={{ new_group }} #updated by Ansible"
