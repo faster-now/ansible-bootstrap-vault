@@ -83,3 +83,14 @@
         state: started
         daemon_reload: true
   
+- hosts: vault
+  gather_facts: no
+  remote_user: "{{ user }}"
+  become: yes
+  tasks:
+    - name: Enable vault service and start
+      ansible.builtin.service:
+        name: "{{ vault_user }}"
+        enabled: yes
+        state: started
+        daemon_reload: true
