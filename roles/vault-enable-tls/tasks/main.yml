@@ -1,0 +1,20 @@
+---
+
+- name: Set the vault config to use TLS
+  lineinfile:
+    dest: "{{ config_file}}"
+    regexp: "{{ config_text.regexp }}"
+    line: "{{ config_text.line }}"
+    backrefs: true
+  loop:
+    - { regexp: '^(\s*)#tls_cert_file\s(.*?)$', line: '\1tls_cert_file  \2' }
+    - { regexp: '^(\s*)#tls_key_file\s(.*?)$', line: '\1tls_key_file  \2' }
+    - { regexp: '^(\s*)tls_disable(\s*=\s*).*?$', line: '\1tls_disable\2"false"' }
+  loop_control:
+    loop_var: config_text
+
+- name: Restart Vault service
+  ansible.builtin.service:
+    name: "{{ vault_user }}"
+    state: restarted
+    daemon_reload: true

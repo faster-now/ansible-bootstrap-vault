@@ -41,3 +41,25 @@
         ca_file: "/etc/{{ vault_user }}.d/ca_cert.pem"
         alt_names: "{{ inventory_hostname }}"
         cname: "{{ inventory_hostname }}"
+
+- hosts: consul:vault
+  gather_facts: no
+  remote_user: "{{ user }}"
+  become: yes
+  tasks:
+    - name: Update consul server and client TLS configuration
+      include_role:
+        name: consul-enable-tls
+      vars:
+        config_file: "/etc/{{ consul_user }}.d/consul.hcl"
+       
+- hosts: vault
+  gather_facts: no
+  remote_user: "{{ user }}"
+  become: yes
+  tasks:
+    - name: Update the vault TLS configuration
+      include_role:
+        name: vault-enable-tls
+      vars:
+        config_file: "/etc/{{ vault_user }}.d/vault.hcl"
