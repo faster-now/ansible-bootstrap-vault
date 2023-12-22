@@ -1,11 +1,17 @@
 ---
 
+#is_https and vault_port come from dependent role
+- name: Setting the Vault URL
+  set_fact:
+    vault_url: "{{ is_https | ternary('https', 'http') }}://{{ inventory_hostname }}:{{ vault_port }}"
+
 - name: Create parent folder to store the certs
+  become: true
   file:
     path: "{{ root_ca_file | dirname }}"
     state: directory
-    owner: "{{user}}"
-    group: "{{user}}"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_user }}"
     mode: 0775
 
 # - name: Test vault read health

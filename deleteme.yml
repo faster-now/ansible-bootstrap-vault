@@ -15,3 +15,6 @@
     - name: Bootstrap Terraform JWT auth
       include_role:
         name: bootstrap-tf-jwt
+    - name: Create CAs
+      include_role:
+        name: create-issuing-ca

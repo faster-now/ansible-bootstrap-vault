@@ -39,9 +39,9 @@
       include_role:
         name: bootstrap-tf-jwt
 
-    # - name: Create CAs
-    #   include_role:
-    #     name: create-issuing-ca
+    - name: Create CAs
+      include_role:
+        name: create-issuing-ca
 
     # - name: Enable TLS
     #   include_role:

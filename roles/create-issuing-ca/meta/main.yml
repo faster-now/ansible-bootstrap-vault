@@ -1,3 +1,5 @@
 ---
 dependencies:
   - role: create-root-ca
+  - role: install-dependencies
+  - role: fetch-vault-protocol

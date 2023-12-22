@@ -1,3 +1,4 @@
 ---
 dependencies:
   - role: install-dependencies
+  - role: fetch-vault-protocol
