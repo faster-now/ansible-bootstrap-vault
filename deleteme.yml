@@ -9,3 +9,6 @@
     - name: Unseal Vault
       include_role:
         name: vault-unseal
+    - name: Enable Vault audit logs
+      include_role:
+        name: vault-enable-audit

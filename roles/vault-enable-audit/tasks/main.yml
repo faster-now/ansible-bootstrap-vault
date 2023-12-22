@@ -19,7 +19,7 @@
     - vault_root_token is defined
     - vault_root_token|length > 0
   delay: 3 #every 5 seconds
-  retries: 12 #12*3 = circa half a minute
+  retries: 12 #12*3 = circa half a minute - to allow for unseal to finish beforehand
   until: ('status' in file_audit_response) and (file_audit_response.status != -1) and (file_audit_response.status != 500)
 
 # - name: audit response
@@ -34,7 +34,7 @@
     body:
       type: file
       options:
-        file_path: "{{ vault_container_audit_dir }}/audit.log"
+        file_path: "opt/{{ vault_user }}/vault.audit.log"
     body_format: json
     method: PUT
     validate_certs: "{{ tls_skip_verify | ternary('false', 'true') }}"
