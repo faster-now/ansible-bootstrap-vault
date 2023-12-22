@@ -26,3 +26,6 @@ consul_config_filename: consul.hcl
 
 vault_config_dir: "/etc/{{ vault_user }}.d/"
 vault_config_filename: vault.hcl
+
+vault_unseal_keys_file: "/home/{{ vault_user }}/unseal-keys.txt"
+vault_root_token_file: "/home/{{ vault_user }}/root-token.txt"

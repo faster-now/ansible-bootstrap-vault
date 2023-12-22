@@ -1,0 +1,11 @@
+- hosts: ansible
+  gather_facts: no
+  remote_user: "{{user}}"
+  become: yes
+  tasks:   
+    - name: Initialise Vault
+      include_role:
+        name: vault-init
+    - name: Unseal Vault
+      include_role:
+        name: vault-unseal

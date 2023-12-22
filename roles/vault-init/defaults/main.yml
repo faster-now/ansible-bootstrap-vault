@@ -7,7 +7,8 @@ vault_secret_threshold: 2
 vault_tls_disable: true
 vault_port: 8200
 
-vault_root_token_file: ~/root-token.txt
-vault_keys_file: ~/unseal-keys.txt
-vault_root_token: "{{ lookup('file', '~/root-token.txt', errors='ignore') }}" #if already initialised root token may exist in file so read it in so that audit check can be done
-vault_keys: "{{ lookup('file', '~/unseal-keys.txt', errors='ignore') }}" #if already initialised root token may exist in file so read it in so that audit check can be done
+
+vault_root_token: "{{ lookup('file', '{{ vault_root_token_file }}', errors='ignore') }}" #if already initialised root token may exist in file so read it in so that audit check can be done
+vault_keys: "{{ lookup('file', '{{ vault_unseal_keys_file }}', errors='ignore') }}" #if already initialised unseal keys may exist in file so read it in so that audit check can be done
+
+vault_force_reinit: false #Functionality not implemented, this does nothing

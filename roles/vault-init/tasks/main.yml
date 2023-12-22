@@ -1,5 +1,6 @@
 ---
 ## ansible-playbook -e "@vault/passwd.yml" init-unseal-vault.yml --check
+#NOTE: force_init not implemented. Would require additional functionality to stop vault & consul clients, issue consul delete command, restart
 
 # The default status codes are:
 #   200 if initialized, unsealed, and active
@@ -14,7 +15,7 @@
     status_code: 200,429,472,501,503
   register: vault_health_response
   delay: 5 #every 5 seconds
-  retries: 12 #12*5 = 1 minutes
+  retries: 12 #12*5 = 1 minutes (During the build there can be a delay to startup all services so keep retrying this check)
   until: ('status' in vault_health_response) and (vault_health_response.status != -1)
 
 
@@ -47,17 +48,9 @@
 
   - name: Write unseal keys to file
     copy:
-      dest: "~/vault/unseal-keys.txt"
+      dest: "{{ vault_unseal_keys_file }}"
       content: "{{ vault_keys }}"
     delegate_to: localhost
-  # - name: Write unseal keys to files
-  #   copy:
-  #     dest: "~/vault/unseal-key{{ my_idx }}.txt"
-  #     content: "{{ item }}"
-  #   delegate_to: localhost
-  #   loop: "{{ vault_keys }}"
-  #   loop_control:
-  #     index_var: my_idx
   
   - name: Write root token to file
     copy:
@@ -68,4 +61,4 @@
   no_log: false
   run_once: true
   when:
-    - vault_health_response.status == 501
+    - vault_health_response.status == 501 or vault_force_reinit
