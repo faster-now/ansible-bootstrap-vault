@@ -12,3 +12,6 @@
     - name: Enable Vault audit logs
       include_role:
         name: vault-enable-audit
+    - name: Bootstrap Terraform JWT auth
+      include_role:
+        name: bootstrap-tf-jwt

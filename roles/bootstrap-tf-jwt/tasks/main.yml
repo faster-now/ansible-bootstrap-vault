@@ -5,7 +5,7 @@
   set_fact:
     vault_url: "{{ is_https | ternary('https', 'http') }}://{{ inventory_hostname }}:{{ vault_port }}"
 
-- name: Check if AppRole needs created
+- name: Check if JWT auth backend needs created
   community.hashi_vault.vault_read:
     url: "{{ vault_url }}"
     path: sys/auth
@@ -15,12 +15,14 @@
   register: auth_list_result
 
 - block:
-  - name: Create AppRole that will be used by TF
+  - name: Create JWT backend that will be used by TF
     community.hashi_vault.vault_write:
       url: "{{ vault_url }}"
-      path: sys/auth/approle-tf
+      path: sys/auth/tfc
       data:
-        type: approle
+        type: jwt
+        oidc_discovery_url: "https://app.terraform.io"
+        bound_issuer: "https://app.terraform.io"
       token: "{{ vault_token }}"
       validate_certs: false
       token_validate: false
@@ -35,34 +37,21 @@
       validate_certs: false
       token_validate: false
 
-  - name: Create the AppRole role with the required policies for TF
+  - name: Create the JWT role with the required policies for TF
     community.hashi_vault.vault_write:
       url: "{{ vault_url }}"
-      path: auth/approle-tf/role/terraform
+      path: auth/tfc/role/terraform
       data:
         policies: "tf-policy"
+        token_max_ttl: "100"
+        user_claim: "aud"
+        role_type: "jwt"
+        bound_audiences: "[\"tfc\"]"
+        bound_claims_type: "glob"
+        bound_claims: "{{ tf_bound_claims }}" #set in group_vars/all
       token: "{{ vault_token }}"
       validate_certs: false
       token_validate: false
 
-  - name: Update the AppRole role role-id
-    community.hashi_vault.vault_write:
-      url: "{{ vault_url }}"
-      path: auth/approle-tf/role/terraform/role-id
-      data:
-        role_id: "{{ role_id }}"
-      token: "{{ vault_token }}"
-      validate_certs: false
-      token_validate: false
-
-  - name: Update the AppRole role secret-id
-    community.hashi_vault.vault_write:
-      url: "{{ vault_url }}"
-      path: auth/approle-tf/role/terraform/custom-secret-id
-      data:
-        secret_id: "{{ secret_id }}"
-      token: "{{ vault_token }}"
-      validate_certs: false
-      token_validate: false
   when:
-    - "not 'approle-tf/' in (auth_list_result | string)"
+    - "not 'tfc/' in (auth_list_result | string)"
