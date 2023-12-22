@@ -81,6 +81,7 @@
   remote_user: "{{ user }}"
   become: yes
   tasks:
+
   - name: Copy the Vault server config file from build pack location to config folder on Vault servers
     ansible.builtin.copy:
       src: "config-files/vault.hcl" #"{{ build_dir }}/{{ service_filename }}"
@@ -88,6 +89,18 @@
       mode: 0640
       owner: "{{ vault_user }}"
       group: "{{ vault_user }}"
+
+  - name: Update Vault node address in config file
+    lineinfile:
+      dest: "{{ vault_config_dir }}{{ vault_config_filename }}"
+      regexp: "{{ config_text.regexp }}"
+      line: "{{ config_text.line }}"
+      backrefs: true
+    loop:
+      - { regexp: '^cluster_addr(\s*=\s*)(.*?)$', line: 'cluster_addr\1"http://{{ inventory_hostname }}:8201"' }
+      - { regexp: '^api_addr(\s*=\s*)(.*?)$', line: 'api_addr\1"http://{{ inventory_hostname }}:8200"' }
+    loop_control:
+      loop_var: config_text
 
 - hosts: vault:consul
   gather_facts: no
