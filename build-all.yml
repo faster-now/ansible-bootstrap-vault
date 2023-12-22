@@ -4,3 +4,4 @@
 - import_playbook: enable-consul-encryption.yml
 #- import_playbook: build-consul-servers.yml
 - import_playbook: build-vault-servers.yml
+- import_playbook: enable-tls.yml

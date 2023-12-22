@@ -119,9 +119,20 @@
   remote_user: "{{ user }}"
   become: yes
   tasks:
-    - name: Enable vault service and start
+    - name: Enable vault service
       ansible.builtin.service:
         name: "{{ vault_user }}"
         enabled: yes
+        state: stopped
+        daemon_reload: true
+
+- hosts: ansible #Only start Vault on the primary server which is the one the initialise operation running next will target
+  gather_facts: no
+  remote_user: "{{ user }}"
+  become: yes
+  tasks:
+    - name: Enable vault service
+      ansible.builtin.service:
+        name: "{{ vault_user }}"
         state: started
         daemon_reload: true

@@ -1,27 +1,16 @@
 ---
-# - hosts: consul:vault
-#   gather_facts: no
-#   remote_user: "{{user}}"
-#   become: no
-#   tasks:
-
-#     - name: Enable consul layer gossip encryption
-#       include_role:
-#         name: consul-enable-encryption
-
 - hosts: ansible
   gather_facts: no
   remote_user: "{{user}}"
   become: no
-  tasks:
+  tasks:   
 
-#     - name: Restart Consul service
-#       ansible.builtin.service:
-#         name: "{{ consul_user }}"
-#         state: restarted
-#         daemon_reload: true
-
-    
+    - name: Enable vault service #Due to previous build actions the primary Vault server returns 500 for the next step so needs restarted first
+      become: true
+      ansible.builtin.service:
+        name: "{{ vault_user }}"
+        state: restarted
+        daemon_reload: true
 
     - name: Initialise Vault
       include_role:
@@ -43,6 +32,4 @@
       include_role:
         name: create-issuing-ca
 
-    # - name: Enable TLS
-    #   include_role:
-    #     name: enable-tls
+

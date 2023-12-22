@@ -63,3 +63,7 @@
         name: vault-enable-tls
       vars:
         config_file: "/etc/{{ vault_user }}.d/vault.hcl"
+    
+    - name: Unseal Vault
+      include_role:
+        name: vault-unseal

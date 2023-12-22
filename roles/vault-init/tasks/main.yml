@@ -47,12 +47,14 @@
     when: display_init_response | bool
 
   - name: Write unseal keys to file
+    become: true
     copy:
       dest: "{{ vault_unseal_keys_file }}"
       content: "{{ vault_keys }}"
     delegate_to: localhost
   
   - name: Write root token to file
+    become: true
     copy:
       content: "{{ vault_root_token }}"
       dest: "{{ vault_root_token_file }}"

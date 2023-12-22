@@ -114,6 +114,7 @@
   changed_when: "'-----BEGIN' in (root_ca_cert_result | string)"
 
 - name: Write Root CA to file
+  become: true
   copy:
     content: "{{ root_ca_cert_result.data.data.certificate }}"
     dest: "{{ root_ca_file }}"

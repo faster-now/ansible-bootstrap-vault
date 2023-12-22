@@ -10,6 +10,8 @@
     - { regexp: '^(\s*)#tls_cert_file\s(.*?)$', line: '\1tls_cert_file  \2' }
     - { regexp: '^(\s*)#tls_key_file\s(.*?)$', line: '\1tls_key_file  \2' }
     - { regexp: '^(\s*)tls_disable(\s*=\s*).*?$', line: '\1tls_disable\2"false"' }
+    - { regexp: '^cluster_addr(\s*=\s*)(.*?)$', line: 'cluster_addr\1"https://{{ inventory_hostname }}:8201"' }
+    - { regexp: '^api_addr(\s*=\s*)(.*?)$', line: 'api_addr\1"https://{{ inventory_hostname }}:8200"' }
   loop_control:
     loop_var: config_text
 

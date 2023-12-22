@@ -102,12 +102,16 @@
       token_validate: false
 
   - name: Write Intermediate certificate to file
+    become: true
     copy:
       content: "{{ ca_cert_result.data.data.certificate }}"
       dest: "{{ issuing_ca_file }}"
   when:
     - ca_cert_result is defined
     - ca_cert_result.changed
+
+- debug:
+    msg: "TTL for leaf_certs role: {{ leaf_cert_lifetime }}."
 
 - name: Create Issuing CA role for leaf certificates
   community.hashi_vault.vault_write:

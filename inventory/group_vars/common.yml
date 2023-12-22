@@ -1,4 +1,0 @@
----
-docker_network: vault_net
-
-base_dir: ~/ansible
