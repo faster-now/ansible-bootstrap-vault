@@ -3,7 +3,7 @@ vault_token: "{{ lookup('file', '{{ vault_root_token_file }}', errors='ignore') 
 is_https: false
 
 issuing_ca_name: vaultca-issuer
-issuing_ca_file: "/home/{{ vault_user }}/certs/issuing_ca.cer"
+#issuing_ca_file: "/home/{{ vault_user }}/certs/issuing_ca.cer"
 cert_lifetime: 94608000 #3 years (in secondes)
 #ca_lifetime: 315360000 #10 years (in seconds)
 #issuing_ca_role: leaf_certs

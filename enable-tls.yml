@@ -1,0 +1,43 @@
+---
+- hosts: consul
+  gather_facts: no
+  remote_user: "{{ user }}"
+  become: yes
+  tasks:
+    - name: Create Consul server TLS certificates
+      include_role:
+        name: consul-create-tls-certs
+      vars:
+        vault_hostname: "{{ groups['ansible'][0] }}"
+        cert_file: "/etc/{{ consul_user }}.d/consul_cert.pem"
+        key_file: "/etc/{{ consul_user }}.d/consul_key.pem"
+        ca_file: "/etc/{{ consul_user }}.d/ca_cert.pem"
+        alt_names: "{{ inventory_hostname }},server.dc1.consul" #required alt_name format for Consul servers
+        cname: "{{ inventory_hostname }}"
+        
+- hosts: vault
+  gather_facts: no
+  remote_user: "{{ user }}"
+  become: yes
+  tasks:
+    - name: Create Consul client TLS certificates
+      include_role:
+        name: consul-create-tls-certs
+      vars:
+        vault_hostname: "{{ groups['ansible'][0] }}"
+        cert_file: "/etc/{{ consul_user }}.d/consul_cert.pem"
+        key_file: "/etc/{{ consul_user }}.d/consul_key.pem"
+        ca_file: "/etc/{{ consul_user }}.d/ca_cert.pem" #required alt_name format for Consul clients
+        alt_names: "{{ inventory_hostname }}-consul"
+        cname: "{{ inventory_hostname }}"
+
+    - name: Create Vault server TLS certificates
+      include_role:
+        name: vault-create-tls-certs
+      vars:
+        vault_hostname: "{{ groups['ansible'][0] }}"
+        cert_file: "/etc/{{ vault_user }}.d/vault_cert.pem"
+        key_file: "/etc/{{ vault_user }}.d/vault_key.pem"
+        ca_file: "/etc/{{ vault_user }}.d/ca_cert.pem"
+        alt_names: "{{ inventory_hostname }}"
+        cname: "{{ inventory_hostname }}"

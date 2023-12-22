@@ -7,6 +7,7 @@
   retries: 7
   delay: 2
   until: ('status' in vault_health_response) and (vault_health_response.status != -1)
+  ignore_errors: true
 
 - name: Is using HTTPS
   set_fact:
