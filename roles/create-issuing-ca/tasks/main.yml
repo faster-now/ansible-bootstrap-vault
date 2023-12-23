@@ -40,16 +40,16 @@
     token_validate: false
   register: needs_tuned_result
 
-- name: Configure the Issuing CA
+- name: Configure (tune) the Issuing CA
   community.hashi_vault.vault_write:
     url: "{{ vault_url }}"
-    path: sys/mounts/pki/tune
+    path: sys/mounts/pki_int/tune
     data:
       max_lease_ttl: "{{ ca_lifetime }}"
     token: "{{ vault_token }}"
     token_validate: false
   when:
-    - needs_tuned_result.data.data.max_lease_ttl != ca_lifetime
+    - (needs_tuned_result is not defined) or (needs_tuned_result.data.data.max_lease_ttl != ca_lifetime)
 
 - name: Check if Issuing CA certificate already exists
   community.hashi_vault.vault_read:
