@@ -136,3 +136,10 @@
         name: "{{ vault_user }}"
         state: started
         daemon_reload: true
+    - name: Run CRON job to auto unseal Vault 50 seconds after a reboot (allows other servers time to boot up first)
+      cron:
+        name: "vault_auto_unseal"
+        user: "{{ user }}"
+        special_time: "reboot"
+        job: "sleep 50 && /home/azureuser/.local/bin/ansible-playbook /home/azureuser/ansible/startup.yml >/tmp/vault-auto-unseal.log 2>&1"
+        state: present
