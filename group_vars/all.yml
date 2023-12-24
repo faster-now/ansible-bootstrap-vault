@@ -1,6 +1,6 @@
 ---
 build_dir: /tmp/build
-user: azureuser
+#user: azureuser
 
 hashicorp_consul_url: "https://releases.hashicorp.com/consul/"
 hashicorp_consul_version: "1.13.6"
