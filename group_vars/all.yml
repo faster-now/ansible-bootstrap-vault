@@ -31,4 +31,4 @@ vault_unseal_keys_file: "/home/{{ vault_user }}/unseal-keys.txt"
 vault_root_token_file: "/home/{{ vault_user }}/root-token.txt"
 
 #The Terraform bound claims below MUST be updated with the Terraform Organization and workspace that you will use in your TFC account to provision into the Vault being built
-tf_bound_claims: '{"sub": ["organization:vault-c:workspace:vault-tf:run_phase:*","organization:vault-c:project:*:workspace:vault-tf:run_phase:*"]}'
+tf_bound_claims: '{"sub": ["organization:vault-c:workspace:vault-tf-dedicated:run_phase:*","organization:vault-c:project:*:workspace:vault-tf-dedicated:run_phase:*"]}'

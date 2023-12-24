@@ -11,7 +11,7 @@
     host: api.ipify.org
     port: 443
 
-- name: Get the public IP of the localhost which is running the Vault docker container(s)
+- name: Get the public IP of the localhost (which should have an assigned public IP)
   register: ip_result
   community.general.ipify_facts:
 
