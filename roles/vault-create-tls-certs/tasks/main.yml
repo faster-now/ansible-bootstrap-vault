@@ -6,6 +6,11 @@
     #vault_url: "http://{{ inventory_hostname }}:{{ vault_port }}"
     vault_url: "{{ is_https | ternary('https', 'http') }}://{{ vault_hostname }}:{{ vault_port }}"
 
+- name: Waits for external ipify connectivity to become available
+  ansible.builtin.wait_for:
+    host: api.ipify.org
+    port: 443
+
 - name: Get the public IP of the localhost which is running the Vault docker container(s)
   register: ip_result
   community.general.ipify_facts:

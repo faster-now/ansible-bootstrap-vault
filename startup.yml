@@ -17,16 +17,16 @@
         name: vault-unseal
 
     # TODO - the below doesnt work. Timeout trying to retrieve public IP address of host.
-    # - name: Create Vault server TLS certificates #public IP address has probably changed so re-issue certs
-    #   include_role:
-    #     name: vault-create-tls-certs
-    #   vars:
-    #     vault_hostname: "{{ groups['ansible'][0] }}"
-    #     cert_file: "/etc/{{ vault_user }}.d/vault_cert.pem"
-    #     key_file: "/etc/{{ vault_user }}.d/vault_key.pem"
-    #     ca_file: "/etc/{{ vault_user }}.d/ca_cert.pem"
-    #     alt_names: "{{ inventory_hostname }}"
-    #     cname: "{{ inventory_hostname }}"
+    - name: Create Vault server TLS certificates #public IP address has probably changed so re-issue certs
+      include_role:
+        name: vault-create-tls-certs
+      vars:
+        vault_hostname: "{{ groups['ansible'][0] }}"
+        cert_file: "/etc/{{ vault_user }}.d/vault_cert.pem"
+        key_file: "/etc/{{ vault_user }}.d/vault_key.pem"
+        ca_file: "/etc/{{ vault_user }}.d/ca_cert.pem"
+        alt_names: "{{ inventory_hostname }}"
+        cname: "{{ inventory_hostname }}"
 
 - hosts: vault
   gather_facts: no
