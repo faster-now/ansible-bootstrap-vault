@@ -21,6 +21,14 @@
       path: sys/auth/tfc
       data:
         type: jwt
+      token: "{{ vault_token }}"
+      validate_certs: false
+      token_validate: false
+  - name: Configure the JWT backend that will be used by TF
+    community.hashi_vault.vault_write:
+      url: "{{ vault_url }}"
+      path: auth/tfc/config
+      data:
         oidc_discovery_url: "https://app.terraform.io"
         bound_issuer: "https://app.terraform.io"
       token: "{{ vault_token }}"
@@ -46,7 +54,7 @@
         token_max_ttl: "100"
         user_claim: "aud"
         role_type: "jwt"
-        bound_audiences: "[\"tfc\"]"
+        bound_audiences: "tfc"
         bound_claims_type: "glob"
         bound_claims: "{{ tf_bound_claims }}" #set in group_vars/all
       token: "{{ vault_token }}"
