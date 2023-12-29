@@ -110,8 +110,14 @@
     - ca_cert_result is defined
     - ca_cert_result.changed
 
-- debug:
-    msg: "TTL for leaf_certs role: {{ leaf_cert_lifetime }}."
+  - name: Base 64 encode the Vault Issuing CA and write to file (required by Terraform for connecting to Vault using Workload Identity)
+      copy:
+        content: '{{ ca_cert_result.data.data.certificate | b64decode }}'
+        dest: "{{ issuing_ca_b64_file }}"
+      delegate_to: localhost
+
+# - debug:
+#     msg: "TTL for leaf_certs role: {{ leaf_cert_lifetime }}."
 
 - name: Create Issuing CA role for leaf certificates
   community.hashi_vault.vault_write:
