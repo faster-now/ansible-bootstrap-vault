@@ -106,16 +106,13 @@
     copy:
       content: "{{ ca_cert_result.data.data.certificate }}"
       dest: "{{ issuing_ca_file }}"
-  when:
-    - ca_cert_result is defined
-    - ca_cert_result.changed
 
   - name: Base 64 encode the Vault Issuing CA and write to file (required by Terraform for connecting to Vault using Workload Identity)
     become: true
     copy:
       content: "{{ ca_cert_result.data.data.certificate | b64decode }}"
       dest: "{{ issuing_ca_b64_file }}"
-    when:
+  when:
     - ca_cert_result is defined
     - ca_cert_result.changed
 
