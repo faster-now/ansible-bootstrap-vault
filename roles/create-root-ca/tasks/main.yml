@@ -93,67 +93,77 @@
   when:
     - needs_tuned_result.data.data.max_lease_ttl != ca_lifetime
 
-# - name: Check if Root CA certificate is generated
-#   community.hashi_vault.vault_read:
-#     url: "{{ vault_url }}"
-#     path: "pki/issuers?list=true"
-#     token: "{{ vault_token }}"
-#     token_validate: false
-#   register: root_ca_cert_result
-- name: Generate the Root CA certificate
-  community.hashi_vault.vault_write:
+- name: Check if Root CA certificate is generated
+  ignore_errors: true #an error is returned when no certificate is set, simply ignore
+  community.hashi_vault.vault_read:
     url: "{{ vault_url }}"
-    path: pki/root/generate/internal
-    data:
-      common_name: "{{ root_ca_name }}"
-      issuer_name: "{{ root_ca_name }}"
-      ttl: "{{ ca_lifetime }}"
+    path: "pki/cert/ca"
     token: "{{ vault_token }}"
     token_validate: false
-  register: root_ca_cert_result
-  changed_when: "'-----BEGIN' in (root_ca_cert_result | string)"
+  register: root_ca_cert_pem
 
-- name: Write Root CA to file
-  become: true
-  copy:
-    content: "{{ root_ca_cert_result.data.data.certificate }}"
-    dest: "{{ root_ca_file }}"
+- name: Display the health data
+  ansible.builtin.debug:
+    msg: "root_ca_cert_pem result: {{ root_ca_cert_pem }}."
+
+- block:
+  - name: Generate the Root CA certificate
+    community.hashi_vault.vault_write:
+      url: "{{ vault_url }}"
+      path: pki/root/generate/internal
+      data:
+        common_name: "{{ root_ca_name }}"
+        issuer_name: "{{ root_ca_name }}"
+        ttl: "{{ ca_lifetime }}"
+      token: "{{ vault_token }}"
+      token_validate: false
+    register: root_ca_cert_result
+    changed_when: "'-----BEGIN' in (root_ca_cert_result | string)"
+
+  - name: Write Root CA to file
+    become: true
+    copy:
+      content: "{{ root_ca_cert_result.data.data.certificate }}"
+      dest: "{{ root_ca_file }}"
+    when:
+      - "'-----BEGIN' in (root_ca_cert_result | string)"
+
+  # - name: Check if the role exists
+  #   community.hashi_vault.vault_read:
+  #     url: "{{ vault_url }}"
+  #     path: "pki/roles/{{ root_ca_role }}"
+  #     token: "{{ vault_token }}"
+  #     token_validate: false
+  #   register: roles_list_result
+
+  # - name: roles list result
+  #   ansible.builtin.debug:
+  #     msg: "{{ roles_list_result }}"
+
+  - name: Create the role for the Root CA
+    community.hashi_vault.vault_write:
+      url: "{{ vault_url }}"
+      path: pki/roles/{{ root_ca_role }}
+      data:
+        allow_any_name: true
+        issuer_ref: "{{ root_ca_name }}"
+        ttl: "{{ ca_lifetime }}"
+      token: "{{ vault_token }}"
+      token_validate: false
+    
+  - name: Configure the Root CA URLs
+    community.hashi_vault.vault_write:
+      url: "{{ vault_url }}"
+      path: pki/config/urls
+      data:
+        issuing_certificates: "{{ vault_url }}/v1/pki/ca"
+        crl_distribution_points: "{{ vault_url }}/v1/pki/crl"
+      token: "{{ vault_token }}"
+      token_validate: false
   when:
-    - "'-----BEGIN' in (root_ca_cert_result | string)"
-
-# - name: Check if the role exists
-#   community.hashi_vault.vault_read:
-#     url: "{{ vault_url }}"
-#     path: "pki/roles/{{ root_ca_role }}"
-#     token: "{{ vault_token }}"
-#     token_validate: false
-#   register: roles_list_result
-
-# - name: roles list result
-#   ansible.builtin.debug:
-#     msg: "{{ roles_list_result }}"
-
-- name: Create the role for the Root CA
-  community.hashi_vault.vault_write:
-    url: "{{ vault_url }}"
-    path: pki/roles/{{ root_ca_role }}
-    data:
-      allow_any_name: true
-      issuer_ref: "{{ root_ca_name }}"
-      ttl: "{{ ca_lifetime }}"
-    token: "{{ vault_token }}"
-    token_validate: false
-  
-- name: Configure the Root CA URLs
-  community.hashi_vault.vault_write:
-    url: "{{ vault_url }}"
-    path: pki/config/urls
-    data:
-      issuing_certificates: "{{ vault_url }}/v1/pki/ca"
-      crl_distribution_points: "{{ vault_url }}/v1/pki/crl"
-    token: "{{ vault_token }}"
-    token_validate: false
-
+    - root_ca_cert_pem is defined
+    - root_ca_cert_pem.failed == True or ('-----BEGIN' not in (root_ca_cert_pem.data.data.certificate | string))
+    #- "('no default issuer currently configured' in (root_ca_cert_pem.stdout | string)) or ('-----BEGIN' not in (root_ca_cert_pem.data.data.certificate | string))"
   
 
 #   - name: Display the result
