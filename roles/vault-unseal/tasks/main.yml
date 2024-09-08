@@ -33,7 +33,11 @@
   become: yes
   slurp:
     src: "{{ vault_unseal_keys_file }}"
-  register: vault_keys
+  register: slurp_contents
+
+- name: Extract unseal keys
+  set_fact: 
+    vault_keys: "{{ slurp_contents['content'] | b64decode }}"
 
 - name: Display vault keys # separate for pretty printing
   debug:
