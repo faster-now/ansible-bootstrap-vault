@@ -1,5 +1,5 @@
 ---
-- name: Install HashiCorp Vault python package
-  ansible.builtin.pip:
-    name: hvac
+# - name: Install HashiCorp Vault python package
+#   ansible.builtin.pip:
+#     name: hvac
     # break_system_packages: true
