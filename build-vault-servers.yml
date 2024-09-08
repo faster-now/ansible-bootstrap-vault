@@ -23,11 +23,17 @@
     - name: Enable Vault audit logs
       include_role:
         name: vault-enable-audit
+  
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  remote_user: "{{user}}"
+  become: no
+  tasks: 
     
     - name: Bootstrap Terraform JWT auth
       include_role:
-        local_action:
-          name: bootstrap-tf-jwt
+        name: bootstrap-tf-jwt
 
     - name: Create CAs
       include_role:
