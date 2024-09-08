@@ -30,6 +30,7 @@
   register: vault_health_response
 
 - name: Read Vault unseal keys from disk
+  become: yes
   slurp:
     src: "{{ vault_unseal_keys_file }}"
   register: vault_keys
