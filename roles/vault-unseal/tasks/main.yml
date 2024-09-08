@@ -29,6 +29,11 @@
   delay: 2
   register: vault_health_response
 
+- name: Read Vault unseal keys from disk
+  slurp:
+    src: "{{ vault_unseal_keys_file }}"
+  register: vault_keys
+
 - name: Display vault keys # separate for pretty printing
   debug:
     msg: "Vault keys: {{ vault_keys }}"

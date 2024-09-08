@@ -61,7 +61,7 @@
       content: "{{ vault_root_token }}"
       dest: "{{ vault_root_token_file }}"
       owner: "{{ vault_user }}"
-      group: "{{ vault_user }}"
+      owner: "{{ vault_user }}"
     delegate_to: localhost
 
   no_log: false
