@@ -1,5 +1,5 @@
 ---
-vault_token: "{{ lookup('file', '{{ vault_root_token_file }}', errors='ignore') }}" #if already initialised root token may exist in file so read it in so that audit check can be done
+#vault_token: "{{ lookup('file', '{{ vault_root_token_file }}', errors='ignore') }}" #if already initialised root token may exist in file so read it in so that audit check can be done
 is_https: false
 
 issuing_ca_name: vaultca-issuer
