@@ -1,6 +1,5 @@
 ---
-- hosts: localhost
-  connection: local
+- hosts: ansible
   gather_facts: no
   remote_user: "{{user}}"
   become: no
@@ -26,8 +25,9 @@
         name: vault-enable-audit
     
     - name: Bootstrap Terraform JWT auth
-      include_role:
-        name: bootstrap-tf-jwt
+      local_action:
+        include_role:
+          name: bootstrap-tf-jwt
 
     - name: Create CAs
       include_role:
