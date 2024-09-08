@@ -5,6 +5,16 @@
   set_fact:
     vault_url: "{{ is_https | ternary('https', 'http') }}://{{ inventory_hostname }}:{{ vault_port }}"
 
+- name: Read Vault root token from disk
+  become: yes
+  slurp:
+    src: "{{ vault_root_token_file }}"
+  register: slurp_contents
+
+- name: Extract root token
+  set_fact: 
+    vault_token: "{{ slurp_contents['content'] | b64decode }}"
+
 - name: Check if JWT auth backend needs created
   community.hashi_vault.vault_read:
     url: "{{ vault_url }}"
