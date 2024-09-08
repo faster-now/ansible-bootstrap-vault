@@ -51,6 +51,8 @@
     copy:
       dest: "{{ vault_unseal_keys_file }}"
       content: "{{ vault_keys }}"
+      owner: "{{ vault_user }}"
+      group: "{{ vault_user }}"
     delegate_to: localhost
   
   - name: Write root token to file
@@ -58,6 +60,8 @@
     copy:
       content: "{{ vault_root_token }}"
       dest: "{{ vault_root_token_file }}"
+      owner: "{{ vault_user }}"
+      group: "{{ vault_user }}"
     delegate_to: localhost
 
   no_log: false
