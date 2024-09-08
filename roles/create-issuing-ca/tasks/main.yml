@@ -6,6 +6,7 @@
     vault_url: "{{ is_https | ternary('https', 'http') }}://{{ inventory_hostname }}:{{ vault_port }}"
 
 - name: Create parent folder to store the certs
+  become: yes
   file:
     path: "{{ issuing_ca_file | dirname }}"
     state: directory
