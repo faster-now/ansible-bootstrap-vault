@@ -1,5 +1,6 @@
 ---
-- hosts: ansible
+- hosts: localhost
+  connection: local
   gather_facts: no
   remote_user: "{{user}}"
   become: no
