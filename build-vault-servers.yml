@@ -25,8 +25,8 @@
         name: vault-enable-audit
     
     - name: Bootstrap Terraform JWT auth
-      local_action:
-        include_role:
+      include_role:
+        local_action:
           name: bootstrap-tf-jwt
 
     - name: Create CAs
