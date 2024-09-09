@@ -17,7 +17,7 @@
         msg: "Vault Token Found: {{ vault_token_t }}."
 
 - hosts: consul
-  gather_facts: no
+  gather_facts: yes
   remote_user: "{{ user }}"
   become: yes
   tasks:
