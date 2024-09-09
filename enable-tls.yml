@@ -7,7 +7,7 @@
   tasks:
     - name: Read Vault root token from disk
       slurp:
-        src: "{{ vault_root_token_file }}" TODO - THIS FILE IS NOT ON THE CONSUL HOSTS HENCE ERROR
+        src: "{{ vault_root_token_file }}" #TODO - THIS FILE IS NOT ON THE CONSUL HOSTS HENCE ERROR
       register: slurp_contents
     - name: Extract root token
       set_fact: 
