@@ -10,7 +10,7 @@
         src: "{{ vault_root_token_file }}" #TODO - THIS FILE IS NOT ON THE CONSUL HOSTS HENCE ERROR
       register: slurp_contents
     - name: Extract root token
-      set_fact: 
+      register: 
         vault_token_t: "{{ slurp_contents['content'] | b64decode }}"
     - name: Print Vault Token Found
       debug:
