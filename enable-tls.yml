@@ -11,10 +11,10 @@
       register: slurp_contents
     - name: Extract root token
       set_fact: 
-        vault_token: "{{ slurp_contents['content'] | b64decode }}"
+        vault_token_t: "{{ slurp_contents['content'] | b64decode }}"
     - name: Print Vault Token Found
       debug:
-        msg: "Vault Token Found: {{ vault_token }}."
+        msg: "Vault Token Found: {{ vault_token_t }}."
 
 - hosts: consul
   gather_facts: no
@@ -31,6 +31,7 @@
         ca_file: "/etc/{{ consul_user }}.d/ca_cert.pem"
         alt_names: "{{ inventory_hostname }},server.dc1.consul" #required alt_name format for Consul servers
         cname: "{{ inventory_hostname }}"
+        vault_token: "{{ vault_token_t }}"
         
 - hosts: vault
   gather_facts: no
