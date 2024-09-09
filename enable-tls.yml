@@ -4,7 +4,7 @@
   gather_facts: no
   remote_user: "{{ user }}"
   become: yes
-  tasks:
+  pre_tasks:
     - name: Read Vault root token from disk
       slurp:
         src: "{{ vault_root_token_file }}" #TODO - THIS FILE IS NOT ON THE CONSUL HOSTS HENCE ERROR
@@ -28,6 +28,7 @@
         ca_file: "/etc/{{ consul_user }}.d/ca_cert.pem"
         alt_names: "{{ inventory_hostname }},server.dc1.consul" #required alt_name format for Consul servers
         cname: "{{ inventory_hostname }}"
+        vault_token: "{{ vault_token }}"
         
 - hosts: vault
   gather_facts: no
