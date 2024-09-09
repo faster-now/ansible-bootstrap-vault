@@ -15,6 +15,9 @@
   # - name: Extract root token
   #   set_fact: 
   #     vault_token: "{{ slurp_contents['content'] | b64decode }}"
+- name: Print Vault Token Found
+  debug:
+    msg: "Vault Token Found: {{ vault_token }}."
 
 - name: Create TLS certificate
   community.hashi_vault.vault_write:
