@@ -6,15 +6,15 @@
     #vault_url: "http://{{ inventory_hostname }}:{{ vault_port }}"
     vault_url: "{{ is_https | ternary('https', 'http') }}://{{ vault_hostname }}:{{ vault_port }}"
 
-- name: Read Vault root token from disk
-  become: yes
-  slurp:
-    src: "{{ vault_root_token_file }}"
-  register: slurp_contents
+  # - name: Read Vault root token from disk
+  #   become: yes
+  #   slurp:
+  #     src: "{{ vault_root_token_file }}" TODO - THIS FILE IS NOT ON THE CONSUL HOSTS HENCE ERROR
+  #   register: slurp_contents
 
-- name: Extract root token
-  set_fact: 
-    vault_token: "{{ slurp_contents['content'] | b64decode }}"
+  # - name: Extract root token
+  #   set_fact: 
+  #     vault_token: "{{ slurp_contents['content'] | b64decode }}"
 
 - name: Create TLS certificate
   community.hashi_vault.vault_write:
