@@ -12,6 +12,8 @@
     - name: Extract root token
       set_fact: 
         vault_token: "{{ slurp_contents['content'] | b64decode }}"
+    - debug:
+      msg: "Vault Token Found: {{ vault_token }}."
 
 - hosts: consul
   gather_facts: no
