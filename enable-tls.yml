@@ -28,7 +28,6 @@
         ca_file: "/etc/{{ consul_user }}.d/ca_cert.pem"
         alt_names: "{{ inventory_hostname }},server.dc1.consul" #required alt_name format for Consul servers
         cname: "{{ inventory_hostname }}"
-        vault_token: "{{ vault_token }}"
         
 - hosts: vault
   gather_facts: no
