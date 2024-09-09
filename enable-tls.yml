@@ -52,6 +52,7 @@
         ca_file: "/etc/{{ consul_user }}.d/ca_cert.pem" #required alt_name format for Consul clients
         alt_names: "{{ inventory_hostname }}-consul"
         cname: "{{ inventory_hostname }}"
+        vault_token: "{{ hostvars.VAULT_TOKEN_HOLDER.token }}"
 
     - name: Create Vault server TLS certificates
       include_role:
@@ -63,6 +64,7 @@
         ca_file: "/etc/{{ vault_user }}.d/ca_cert.pem"
         alt_names: "{{ inventory_hostname }}"
         cname: "{{ inventory_hostname }}"
+        vault_token: "{{ hostvars.VAULT_TOKEN_HOLDER.token }}"
 
 - hosts: consul:vault
   gather_facts: no
